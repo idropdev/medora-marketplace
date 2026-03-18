@@ -18,7 +18,7 @@ interface MapViewProps {
 
 export function MapView({ providers, selectedProvider, onProviderSelect }: MapViewProps) {
     const containerRef = useRef<HTMLDivElement>(null);
-    const mapRef = useRef<google.maps.Map | null>(null);
+    const [mapInstance, setMapInstance] = useState<google.maps.Map | null>(null);
     const markersRef = useRef<Map<string, google.maps.Marker>>(new Map());
     
     // User location tracking
@@ -43,14 +43,17 @@ export function MapView({ providers, selectedProvider, onProviderSelect }: MapVi
 
     // ── Init map ───────────────────────────────────────────────────────────
     useEffect(() => {
-        if (!API_KEY || !containerRef.current || mapRef.current) return;
+        if (!API_KEY || !containerRef.current || mapInstance) return;
 
+        let isMounted = true;
         (async () => {
             try {
                 const { Map } = await importLibrary('maps');
+                await importLibrary('marker'); // ensure marker library is loaded
+                
                 const initialTheme = document.documentElement.getAttribute('data-theme') || 'dark';
                 
-                mapRef.current = new Map(containerRef.current!, {
+                const map = new Map(containerRef.current!, {
                     center: BORDER_CENTER,
                     zoom: DEFAULT_ZOOM,
                     zoomControl: true,
@@ -58,12 +61,18 @@ export function MapView({ providers, selectedProvider, onProviderSelect }: MapVi
                     mapTypeControl: false,
                     fullscreenControl: false,
                     styles: initialTheme === 'light' ? lightMapStyles : darkMapStyles,
+                    mapId: 'DEMO_MAP_ID', // Recommended for advanced features
                 });
+                
+                if (isMounted) {
+                    setMapInstance(map);
+                }
             } catch (err) {
                 console.error('[MapView] Maps init error:', err);
             }
         })();
-    }, []);
+        return () => { isMounted = false; };
+    }, [mapInstance]);
 
     // ── Theme Listener ─────────────────────────────────────────────────────
     useEffect(() => {
@@ -71,8 +80,8 @@ export function MapView({ providers, selectedProvider, onProviderSelect }: MapVi
             mutations.forEach((mutation) => {
                 if (mutation.attributeName === 'data-theme') {
                     const newTheme = document.documentElement.getAttribute('data-theme');
-                    if (mapRef.current) {
-                        mapRef.current.setOptions({
+                    if (mapInstance) {
+                        mapInstance.setOptions({
                             styles: newTheme === 'light' ? lightMapStyles : darkMapStyles
                         });
                     }
@@ -86,7 +95,7 @@ export function MapView({ providers, selectedProvider, onProviderSelect }: MapVi
 
     // ── Sync markers ───────────────────────────────────────────────────────
     useEffect(() => {
-        if (!mapRef.current) return;
+        if (!mapInstance) return;
 
         const existingIds = new Set(markersRef.current.keys());
         const newIds = new Set(providers.map((p) => p.id));
@@ -108,7 +117,7 @@ export function MapView({ providers, selectedProvider, onProviderSelect }: MapVi
                 markersRef.current.get(p.id)!.setIcon(icon);
             } else {
                 const marker = new google.maps.Marker({
-                    map: mapRef.current!,
+                    map: mapInstance,
                     position: { lat: p.lat, lng: p.lng },
                     title: p.name,
                     icon,
@@ -117,15 +126,15 @@ export function MapView({ providers, selectedProvider, onProviderSelect }: MapVi
                 markersRef.current.set(p.id, marker);
             }
         }
-    }, [providers, selectedProvider, makeIcon, onProviderSelect]);
+    }, [providers, selectedProvider, makeIcon, onProviderSelect, mapInstance]);
 
     // ── Pan to selected ────────────────────────────────────────────────────
     useEffect(() => {
-        if (mapRef.current && selectedProvider) {
-            mapRef.current.panTo({ lat: selectedProvider.lat, lng: selectedProvider.lng });
-            mapRef.current.setZoom(15);
+        if (mapInstance && selectedProvider) {
+            mapInstance.panTo({ lat: selectedProvider.lat, lng: selectedProvider.lng });
+            mapInstance.setZoom(15);
         }
-    }, [selectedProvider]);
+    }, [selectedProvider, mapInstance]);
 
     // ── Get User Geolocation ────────────────────────────────────────────────
     const locateUser = useCallback(() => {
@@ -142,9 +151,9 @@ export function MapView({ providers, selectedProvider, onProviderSelect }: MapVi
                 };
                 setUserLoc(pos);
                 
-                if (mapRef.current) {
-                    mapRef.current.panTo(pos);
-                    mapRef.current.setZoom(14);
+                if (mapInstance) {
+                    mapInstance.panTo(pos);
+                    mapInstance.setZoom(14);
                 }
             },
             () => {
@@ -155,11 +164,11 @@ export function MapView({ providers, selectedProvider, onProviderSelect }: MapVi
 
     // ── Sync User Marker ───────────────────────────────────────────────────
     useEffect(() => {
-        if (!mapRef.current || !userLoc) return;
+        if (!mapInstance || !userLoc) return;
 
         if (!userMarkerRef.current) {
             userMarkerRef.current = new google.maps.Marker({
-                map: mapRef.current,
+                map: mapInstance,
                 position: userLoc,
                 title: 'You are here',
                 icon: {
