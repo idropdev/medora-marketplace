@@ -47,7 +47,20 @@ export function ProviderCard({ provider, selected, onClick }: ProviderCardProps)
             }}
         >
             {/* Header row */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', justifyContent: 'space-between' }}>
+                {/* Fallback Avatar */}
+                <div style={{
+                    width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
+                    background: provider.promoted ? 'linear-gradient(135deg, var(--gold), var(--gold-light))' : (provider.country === 'MX' ? 'rgba(34,197,94,0.1)' : 'rgba(59,130,246,0.1)'),
+                    color: provider.promoted ? 'var(--navy)' : (provider.country === 'MX' ? '#4ade80' : '#93c5fd'),
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 800, fontSize: '0.9rem',
+                    boxShadow: provider.promoted ? '0 4px 12px rgba(201,168,76,0.4)' : 'none',
+                    border: `1px solid ${provider.promoted ? 'transparent' : (provider.country === 'MX' ? 'rgba(34,197,94,0.3)' : 'rgba(59,130,246,0.3)')}`
+                }}>
+                    {provider.name.charAt(0).toUpperCase()}
+                </div>
+
                 <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.2rem' }}>
                         {provider.promoted && (

@@ -3,10 +3,10 @@ import * as crypto from 'crypto';
 
 const GOOGLE_KEY = process.env.VITE_GOOGLE_MAPS_API_KEY;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = process.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!GOOGLE_KEY || !SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('❌ Missing required environment variables. Ensure VITE_GOOGLE_MAPS_API_KEY, VITE_SUPABASE_URL, and VITE_SUPABASE_ANON_KEY are set.');
+  console.error('❌ Missing required environment variables. Ensure VITE_GOOGLE_MAPS_API_KEY, VITE_SUPABASE_URL, and SUPABASE_SERVICE_ROLE_KEY are set.');
   process.exit(1);
 }
 
