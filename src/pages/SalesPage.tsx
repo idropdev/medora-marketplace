@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { MapPin, TrendingUp, Star, Users, Globe, ChevronRight, Zap, CheckCircle } from 'lucide-react';
+import { MapPin, ChevronRight, Zap, CheckCircle } from 'lucide-react';
 import { mockProviders } from '../data/providers';
 
 const totalProviders = mockProviders.length;

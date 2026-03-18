@@ -1,4 +1,4 @@
-import { Star, MapPin, Phone, Globe, ChevronRight, Zap } from 'lucide-react';
+import { Star, MapPin, ChevronRight, Zap } from 'lucide-react';
 import type { Provider } from '../../types/provider';
 import { SpecialtyLabels } from '../../types/provider';
 import { trackProviderClick } from '../../utils/analytics';
