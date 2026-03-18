@@ -1,5 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import * as crypto from 'crypto';
+import * as fs from 'fs';
+import * as path from 'path';
 
 const GOOGLE_KEY = process.env.VITE_GOOGLE_MAPS_API_KEY;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
@@ -11,6 +13,24 @@ if (!GOOGLE_KEY || !SUPABASE_URL || !SUPABASE_KEY) {
 }
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const CACHE_DIR = path.join(__dirname, '.cache');
+if (!fs.existsSync(CACHE_DIR)) {
+  fs.mkdirSync(CACHE_DIR, { recursive: true });
+}
+
+function getCache(key: string) {
+  const file = path.join(CACHE_DIR, `${key}.json`);
+  if (fs.existsSync(file)) {
+    return JSON.parse(fs.readFileSync(file, 'utf-8'));
+  }
+  return null;
+}
+
+function setCache(key: string, data: any) {
+  const file = path.join(CACHE_DIR, `${key}.json`);
+  fs.writeFileSync(file, JSON.stringify(data, null, 2), 'utf-8');
+}
 
 const SEARCH_QUERIES = [
   // El Paso Searches
@@ -43,6 +63,13 @@ const SEARCH_QUERIES = [
 ];
 
 async function fetchGooglePlaces(query: string) {
+  const cacheKey = `search_${crypto.createHash('md5').update(query).digest('hex')}`;
+  const cached = getCache(cacheKey);
+  if (cached) {
+    console.log(`📦 [Cache Hit] Search: "${query}"`);
+    return cached;
+  }
+
   // 1. Text Search to get a list of places
   const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${GOOGLE_KEY}`;
   const searchRes = await fetch(searchUrl);
@@ -53,17 +80,28 @@ async function fetchGooglePlaces(query: string) {
     return [];
   }
 
+  setCache(cacheKey, searchData.results);
   return searchData.results;
 }
 
 async function fetchPlaceDetails(placeId: string) {
+  const cacheKey = `details_${placeId}`;
+  const cached = getCache(cacheKey);
+  if (cached) {
+    return cached;
+  }
+
   const fields = 'name,formatted_address,geometry,international_phone_number,website,rating,user_ratings_total,address_components';
   const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=${fields}&key=${GOOGLE_KEY}`;
   
   const res = await fetch(detailsUrl);
   const data = await res.json();
   
-  return data.status === 'OK' ? data.result : null;
+  const result = data.status === 'OK' ? data.result : null;
+  if (result) {
+    setCache(cacheKey, result);
+  }
+  return result;
 }
 
 function extractCityAndCountry(addressComponents: any[]) {
