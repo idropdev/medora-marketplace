@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useProviders } from '../hooks/useProviders';
-import { MapPin } from 'lucide-react';
+import { MapPin, List } from 'lucide-react';
 import { SearchBar } from '../components/search/SearchBar';
 import { FilterBar } from '../components/search/FilterBar';
 import { ProviderCard } from '../components/provider/ProviderCard';
@@ -9,6 +10,7 @@ import { trackProviderClick } from '../utils/analytics';
 
 export function MapPage() {
     const { providers, filters, updateFilter, resetFilters, selectedProvider, setSelectedProvider, loading } = useProviders();
+    const [mobileView, setMobileView] = useState<'map' | 'list'>('map');
 
     const handleSelect = (p: typeof providers[0]) => {
         trackProviderClick(p);
@@ -18,15 +20,7 @@ export function MapPage() {
     return (
         <div style={{ display: 'flex', height: '100vh', paddingTop: 60, overflow: 'hidden' }}>
             {/* ── Left sidebar ── */}
-            <aside style={{
-                width: 340,
-                flexShrink: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                borderRight: '1px solid rgba(255,255,255,0.08)',
-                background: 'var(--navy)',
-                overflowY: 'auto',
-            }}>
+            <aside className={`map-sidebar ${mobileView === 'map' ? 'hidden-on-mobile' : ''}`}>
                 {/* Search + Filters */}
                 <div style={{ padding: '1rem', borderBottom: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '0.75rem', position: 'sticky', top: 0, background: 'var(--navy)', zIndex: 10 }}>
                     <SearchBar value={filters.search} onChange={(v) => updateFilter('search', v)} />
@@ -67,7 +61,7 @@ export function MapPage() {
             </aside>
 
             {/* ── Map ── */}
-            <main style={{ flex: 1, position: 'relative' }}>
+            <main className={`map-main ${mobileView === 'list' ? 'hidden-on-mobile' : ''}`} style={{ flex: 1, position: 'relative' }}>
                 {loading && (
                     <div style={{
                         position: 'absolute', inset: 0,
@@ -103,6 +97,25 @@ export function MapPage() {
                 provider={selectedProvider}
                 onClose={() => setSelectedProvider(null)}
             />
+
+            {/* Mobile View Toggle FAB */}
+            <button
+                className="mobile-only"
+                onClick={() => setMobileView(v => v === 'map' ? 'list' : 'map')}
+                style={{
+                    position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
+                    zIndex: 100, padding: '0.875rem 1.5rem', borderRadius: 'var(--radius-pill)',
+                    background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
+                    color: 'var(--navy)', fontWeight: 700, fontSize: '0.95rem',
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.4)', border: 'none', alignItems: 'center', gap: '0.5rem'
+                }}
+            >
+                {mobileView === 'map' ? (
+                    <><List size={18} /> View List</>
+                ) : (
+                    <><MapPin size={18} /> View Map</>
+                )}
+            </button>
         </div>
     );
 }

@@ -30,6 +30,7 @@ export function ProviderDrawer({ provider, onClose }: ProviderDrawerProps) {
 
             {/* Drawer panel */}
             <div
+                className="drawer-panel"
                 style={{
                     position: 'fixed', top: 60, right: 0, bottom: 0,
                     width: '100%', maxWidth: 400,

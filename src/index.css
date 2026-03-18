@@ -195,3 +195,26 @@ select option {
 }
 .animate-fade-in     { animation: fadeIn 0.3s ease both; }
 .animate-slide-right { animation: slideInRight 0.3s ease both; }
+
+/* ─── Mobile Responsiveness ──────────────────────────── */
+.mobile-only { display: none !important; }
+
+.map-sidebar {
+  width: 340px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--nav-border);
+  background: var(--navy);
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .desktop-only { display: none !important; }
+  .mobile-only { display: flex !important; }
+
+  .map-sidebar { width: 100% !important; border-right: none !important; }
+  .map-sidebar.hidden-on-mobile { display: none !important; }
+  .map-main.hidden-on-mobile { display: none !important; }
+  .drawer-panel { width: 100% !important; max-width: 100% !important; }
+}
