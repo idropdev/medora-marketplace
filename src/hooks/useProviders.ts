@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import type { Provider, ProviderFilters } from '../types/provider';
 import { supabase } from '../lib/supabase';
+import { mockProviders } from '../data/providers';
 
 const defaultFilters: ProviderFilters = {
     search: '',
@@ -20,7 +21,8 @@ export function useProviders() {
 
         async function fetchProviders() {
             if (!supabase) {
-                console.warn('Supabase client not initialized');
+                console.warn('[Supabase] client not initialized. Falling back to mock providers.');
+                if (mounted) setAllProviders(mockProviders);
                 setLoading(false);
                 return;
             }
@@ -29,15 +31,22 @@ export function useProviders() {
                 const { data, error } = await supabase.from('providers').select('*');
                 
                 if (error) {
-                    console.error('Error fetching providers:', error);
+                    console.error('[Supabase] Error fetching providers:', error);
+                    if (mounted) setAllProviders(mockProviders);
                     return;
                 }
 
                 if (mounted && data) {
-                    setAllProviders(data as Provider[]);
+                    if (data.length > 0) {
+                        setAllProviders(data as Provider[]);
+                    } else {
+                        console.warn('[Supabase] No providers found in DB, using mock data.');
+                        setAllProviders(mockProviders);
+                    }
                 }
             } catch (err) {
                 console.error('Failed to fetch providers:', err);
+                if (mounted) setAllProviders(mockProviders);
             } finally {
                 if (mounted) setLoading(false);
             }
