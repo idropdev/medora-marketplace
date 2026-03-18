@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, ChevronRight, Zap, CheckCircle } from 'lucide-react';
 import { mockProviders } from '../data/providers';
@@ -7,15 +8,27 @@ const avgRating = (mockProviders.reduce((s, p) => s + p.rating, 0) / totalProvid
 const totalClicks = mockProviders.reduce((s, p) => s + p.clicks, 0);
 
 export function SalesPage() {
+    const [mousePos, setMousePos] = useState({ x: 50, y: 0 });
+
+    const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width) * 100;
+        const y = ((e.clientY - rect.top) / rect.height) * 100;
+        setMousePos({ x, y });
+    };
+
     return (
         <div style={{ paddingTop: 60 }}>
             {/* ── Hero ── */}
-            <section style={{
-                minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: '4rem 1.5rem',
-                position: 'relative', overflow: 'hidden',
-                background: 'radial-gradient(ellipse 80% 60% at 50% 0%, rgba(201,168,76,0.12) 0%, transparent 70%)',
-            }}>
+            <section
+                onMouseMove={handleMouseMove}
+                style={{
+                    minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: '4rem 1.5rem',
+                    position: 'relative', overflow: 'hidden',
+                    background: `radial-gradient(circle 800px at ${mousePos.x}% ${mousePos.y}%, rgba(201,168,76,0.15) 0%, rgba(201,168,76,0.05) 40%, transparent 80%)`,
+                }}
+            >
                 {/* Background grid */}
                 <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.04, pointerEvents: 'none' }} viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
                     <defs><pattern id="sg" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#C9A84C" strokeWidth="0.5" /></pattern></defs>
@@ -23,9 +36,6 @@ export function SalesPage() {
                 </svg>
 
                 <div style={{ textAlign: 'center', maxWidth: 720, position: 'relative', zIndex: 1 }}>
-                    <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', padding: '0.35rem 1rem', borderRadius: 'var(--radius-pill)', background: 'rgba(201,168,76,0.12)', border: '1px solid rgba(201,168,76,0.3)', marginBottom: '1.5rem', fontSize: '0.8rem', color: 'var(--gold)', fontWeight: 600 }}>
-                        <MapPin size={13} /> El Paso · Ciudad Juárez Border
-                    </div>
 
                     <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 800, lineHeight: 1.1, marginBottom: '1rem', letterSpacing: '-0.03em' }}>
                         Put your practice<br />
