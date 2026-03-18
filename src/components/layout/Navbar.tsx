@@ -79,6 +79,7 @@ function NavLink({ to, label, active }: { to: string; label: string; active: boo
                 borderRadius: 'var(--radius-pill)',
                 fontSize: '0.875rem',
                 fontWeight: 500,
+                whiteSpace: 'nowrap',
                 color: active ? 'var(--navy)' : 'var(--gray-400)',
                 background: active ? 'var(--gold)' : 'transparent',
                 transition: 'var(--transition)',
