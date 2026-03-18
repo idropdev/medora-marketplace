@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, ChevronRight, Zap, CheckCircle } from 'lucide-react';
 import { mockProviders } from '../data/providers';
@@ -68,104 +68,114 @@ export function SalesPage() {
 
             {/* ── Stats ── */}
             <section style={{ background: 'rgba(255,255,255,0.03)', borderTop: '1px solid rgba(255,255,255,0.07)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '3rem 1.5rem' }}>
-                <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '2rem', textAlign: 'center' }}>
-                    <StatTile icon="🏥" value={`${totalProviders}+`} label="Providers Listed" />
-                    <StatTile icon="👁" value={totalClicks.toLocaleString()} label="Profile Views" />
-                    <StatTile icon="⭐" value={avgRating} label="Avg Rating" />
-                    <StatTile icon="🌎" value="2 Cities" label="El Paso + Juárez" />
-                </div>
+                <Reveal delay={0.1}>
+                    <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '2rem', textAlign: 'center' }}>
+                        <StatTile icon="🏥" value={`${totalProviders}+`} label="Providers Listed" />
+                        <StatTile icon="👁" value={totalClicks.toLocaleString()} label="Profile Views" />
+                        <StatTile icon="⭐" value={avgRating} label="Avg Rating" />
+                        <StatTile icon="🌎" value="2 Cities" label="El Paso + Juárez" />
+                    </div>
+                </Reveal>
             </section>
 
             {/* ── How It Works ── */}
             <section style={{ padding: '5rem 1.5rem' }}>
-                <div style={{ maxWidth: 900, margin: '0 auto' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-                        <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>How it works</h2>
-                        <p style={{ color: 'var(--gray-400)', maxWidth: 480, margin: '0 auto' }}>Three steps to start receiving new patients from across the border.</p>
+                <Reveal delay={0.1}>
+                    <div style={{ maxWidth: 900, margin: '0 auto' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+                            <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>How it works</h2>
+                            <p style={{ color: 'var(--gray-400)', maxWidth: 480, margin: '0 auto' }}>Three steps to start receiving new patients from across the border.</p>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
+                            <StepCard step="1" icon="📋" title="Create your profile" body="Add your name, specialties, location, and contact info. It takes under 5 minutes and is completely free." />
+                            <StepCard step="2" icon="🗺️" title="Appear on the map" body="Your clinic shows up to US patients searching for care in Juárez — no SEO knowledge required." />
+                            <StepCard step="3" icon="📈" title="Track your leads" body="See how many people view your profile each month. Use that data to understand your reach." />
+                        </div>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
-                        <StepCard step="1" icon="📋" title="Create your profile" body="Add your name, specialties, location, and contact info. It takes under 5 minutes and is completely free." />
-                        <StepCard step="2" icon="🗺️" title="Appear on the map" body="Your clinic shows up to US patients searching for care in Juárez — no SEO knowledge required." />
-                        <StepCard step="3" icon="📈" title="Track your leads" body="See how many people view your profile each month. Use that data to understand your reach." />
-                    </div>
-                </div>
+                </Reveal>
             </section>
 
             {/* ── Pricing ── */}
             <section style={{ padding: '5rem 1.5rem', background: 'rgba(255,255,255,0.02)' }}>
-                <div style={{ maxWidth: 800, margin: '0 auto' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-                        <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>Simple pricing</h2>
-                        <p style={{ color: 'var(--gray-400)' }}>Start for free. Upgrade when you see results.</p>
+                <Reveal delay={0.1}>
+                    <div style={{ maxWidth: 800, margin: '0 auto' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
+                            <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>Simple pricing</h2>
+                            <p style={{ color: 'var(--gray-400)' }}>Start for free. Upgrade when you see results.</p>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                            <PricingCard
+                                tier="Free Listing"
+                                price="$0"
+                                period="forever"
+                                color="rgba(255,255,255,0.06)"
+                                border="rgba(255,255,255,0.1)"
+                                features={[
+                                    'Appear on the Medora map',
+                                    'Name, specialty & contact info',
+                                    'Monthly profile view count',
+                                    'EN + ES visibility',
+                                ]}
+                                cta="Get listed"
+                                ctaHref="mailto:hello@medora.com"
+                                ctaStyle="outline"
+                            />
+                            <PricingCard
+                                tier="Promoted Listing"
+                                price="$49"
+                                period="/ month"
+                                color="rgba(201,168,76,0.08)"
+                                border="rgba(201,168,76,0.35)"
+                                badge="Most Popular"
+                                features={[
+                                    'Everything in Free',
+                                    'Gold promoted pin on map',
+                                    'Priority in search results',
+                                    'Detailed analytics dashboard',
+                                    'Featured in weekly digest',
+                                ]}
+                                cta="Start free trial"
+                                ctaHref="mailto:hello@medora.com"
+                                ctaStyle="gold"
+                            />
+                        </div>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
-                        <PricingCard
-                            tier="Free Listing"
-                            price="$0"
-                            period="forever"
-                            color="rgba(255,255,255,0.06)"
-                            border="rgba(255,255,255,0.1)"
-                            features={[
-                                'Appear on the Medora map',
-                                'Name, specialty & contact info',
-                                'Monthly profile view count',
-                                'EN + ES visibility',
-                            ]}
-                            cta="Get listed"
-                            ctaHref="mailto:hello@medora.com"
-                            ctaStyle="outline"
-                        />
-                        <PricingCard
-                            tier="Promoted Listing"
-                            price="$49"
-                            period="/ month"
-                            color="rgba(201,168,76,0.08)"
-                            border="rgba(201,168,76,0.35)"
-                            badge="Most Popular"
-                            features={[
-                                'Everything in Free',
-                                'Gold promoted pin on map',
-                                'Priority in search results',
-                                'Detailed analytics dashboard',
-                                'Featured in weekly digest',
-                            ]}
-                            cta="Start free trial"
-                            ctaHref="mailto:hello@medora.com"
-                            ctaStyle="gold"
-                        />
-                    </div>
-                </div>
+                </Reveal>
             </section>
 
             {/* ── Target Specialties ── */}
             <section style={{ padding: '5rem 1.5rem' }}>
-                <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
-                    <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>Who we serve</h2>
-                    <p style={{ color: 'var(--gray-400)', marginBottom: '2.5rem', maxWidth: 500, margin: '0 auto 2.5rem' }}>Any healthcare or wellness provider near the border can list on Medora.</p>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center' }}>
-                        {[['🦷', 'Dentistry'], ['😁', 'Orthodontics'], ['💉', 'Plastic Surgery'], ['✨', 'Aesthetics'], ['👶', 'OB/GYN'], ['🏃', 'Physical Therapy'], ['💆', 'Massage'], ['👁', 'Optometry'], ['❤️', 'Cardiology'], ['🏥', 'General Practice']].map(([emoji, label]) => (
-                            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.1rem', borderRadius: 'var(--radius-pill)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.875rem' }}>
-                                <span>{emoji}</span> {label}
-                            </div>
-                        ))}
+                <Reveal delay={0.2}>
+                    <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
+                        <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>Who we serve</h2>
+                        <p style={{ color: 'var(--gray-400)', marginBottom: '2.5rem', maxWidth: 500, margin: '0 auto 2.5rem' }}>Any healthcare or wellness provider near the border can list on Medora.</p>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center' }}>
+                            {[['🦷', 'Dentistry'], ['😁', 'Orthodontics'], ['💉', 'Plastic Surgery'], ['✨', 'Aesthetics'], ['👶', 'OB/GYN'], ['🏃', 'Physical Therapy'], ['💆', 'Massage'], ['👁', 'Optometry'], ['❤️', 'Cardiology'], ['🏥', 'General Practice']].map(([emoji, label]) => (
+                                <div key={label} className="hover-lift" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.1rem', borderRadius: 'var(--radius-pill)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.875rem', cursor: 'pointer' }}>
+                                    <span>{emoji}</span> {label}
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                </Reveal>
             </section>
 
             {/* ── CTA Banner ── */}
             <section style={{ padding: '5rem 1.5rem', background: 'linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05))' }}>
-                <div style={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
-                    <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '1rem' }}>Ready to get discovered?</h2>
-                    <p style={{ color: 'var(--gray-400)', marginBottom: '2rem' }}>Medical tourism you can trust — starting with your practice.</p>
-                    <a href="mailto:hello@medora.com" style={{
-                        display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                        padding: '1rem 2rem', borderRadius: 'var(--radius-pill)',
-                        background: 'linear-gradient(135deg, #C9A84C, #e0c075)',
-                        color: 'var(--navy)', fontWeight: 700, fontSize: '1rem',
-                    }}>
-                        Contact the Medora team <ChevronRight size={18} />
-                    </a>
-                </div>
+                <Reveal delay={0.1}>
+                    <div style={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
+                        <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '1rem' }}>Ready to get discovered?</h2>
+                        <p style={{ color: 'var(--gray-400)', marginBottom: '2rem' }}>Medical tourism you can trust — starting with your practice.</p>
+                        <a href="mailto:hello@medora.com" className="hover-lift" style={{
+                            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                            padding: '1rem 2rem', borderRadius: 'var(--radius-pill)',
+                            background: 'linear-gradient(135deg, #C9A84C, #e0c075)',
+                            color: 'var(--navy)', fontWeight: 700, fontSize: '1rem',
+                        }}>
+                            Contact the Medora team <ChevronRight size={18} />
+                        </a>
+                    </div>
+                </Reveal>
             </section>
 
             {/* Footer */}
@@ -178,7 +188,7 @@ export function SalesPage() {
 
 function StatTile({ icon, value, label }: { icon: string; value: string; label: string }) {
     return (
-        <div>
+        <div className="hover-lift" style={{ padding: '1.5rem', borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
             <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{icon}</div>
             <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--gold)' }}>{value}</div>
             <div style={{ fontSize: '0.85rem', color: 'var(--gray-400)', marginTop: '0.25rem' }}>{label}</div>
@@ -188,7 +198,7 @@ function StatTile({ icon, value, label }: { icon: string; value: string; label: 
 
 function StepCard({ step, icon, title, body }: { step: string; icon: string; title: string; body: string }) {
     return (
-        <div style={{ padding: '1.75rem', borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div className="hover-lift" style={{ padding: '1.75rem', borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, color: 'var(--gold)', flexShrink: 0 }}>{step}</div>
                 <span style={{ fontSize: '1.5rem' }}>{icon}</span>
@@ -204,7 +214,7 @@ function PricingCard({ tier, price, period, color, border, badge, features, cta,
     badge?: string; features: string[]; cta: string; ctaHref: string; ctaStyle: 'gold' | 'outline';
 }) {
     return (
-        <div style={{ padding: '2rem', borderRadius: 'var(--radius)', background: color, border: `1px solid ${border}`, display: 'flex', flexDirection: 'column', gap: '1.25rem', position: 'relative' }}>
+        <div className="hover-lift" style={{ padding: '2rem', borderRadius: 'var(--radius)', background: color, border: `1px solid ${border}`, display: 'flex', flexDirection: 'column', gap: '1.25rem', position: 'relative' }}>
             {badge && (
                 <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', padding: '0.25rem 0.875rem', borderRadius: 'var(--radius-pill)', background: 'linear-gradient(135deg,#C9A84C,#e0c075)', color: 'var(--navy)', fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
                     <Zap size={10} style={{ display: 'inline', marginRight: 4 }} />{badge}
@@ -235,6 +245,35 @@ function PricingCard({ tier, price, period, color, border, badge, features, cta,
             }}>
                 {cta}
             </a>
+        </div>
+    );
+}
+
+function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: number }) {
+    const ref = useRef<HTMLDivElement>(null);
+    const [isVisible, setIsVisible] = useState(false);
+
+    useEffect(() => {
+        if (!ref.current) return;
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                setIsVisible(true);
+                observer.unobserve(entry.target);
+            }
+        }, { threshold: 0.1, rootMargin: '50px' });
+        
+        observer.observe(ref.current);
+        return () => observer.disconnect();
+    }, []);
+
+    return (
+        <div ref={ref} style={{
+            opacity: isVisible ? 1 : 0,
+            transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
+            transition: `opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) ${delay}s, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) ${delay}s`,
+            willChange: 'opacity, transform',
+        }}>
+            {children}
         </div>
     );
 }
