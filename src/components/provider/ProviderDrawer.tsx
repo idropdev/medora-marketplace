@@ -2,6 +2,8 @@ import { X, Star, MapPin, Phone, Globe, Languages, Zap, CheckCircle, ExternalLin
 import type { Provider } from '../../types/provider';
 import { SpecialtyLabels } from '../../types/provider';
 import { trackProviderClick } from '../../utils/analytics';
+import { useGoogleReviews } from '../../hooks/useGoogleReviews';
+import { ReviewCarousel } from './ReviewCarousel';
 
 interface ProviderDrawerProps {
     provider: Provider | null;
@@ -9,6 +11,8 @@ interface ProviderDrawerProps {
 }
 
 export function ProviderDrawer({ provider, onClose }: ProviderDrawerProps) {
+    const { reviews, loading: reviewsLoading } = useGoogleReviews(provider?.googlePlaceId);
+
     if (!provider) return null;
 
     const handleWebsiteClick = () => {
@@ -105,52 +109,56 @@ export function ProviderDrawer({ provider, onClose }: ProviderDrawerProps) {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                         <DetailRow icon={<MapPin size={15} />} text={provider.address} />
                         {provider.phone && <DetailRow icon={<Phone size={15} />} text={provider.phone} href={`tel:${provider.phone}`} />}
-                        {provider.website && (
-                            <DetailRow
-                                icon={<Globe size={15} />}
-                                text={provider.website.replace(/^https?:\/\//, '')}
-                                href={provider.website}
-                                external
-                            />
-                        )}
                         <DetailRow
                             icon={<Languages size={15} />}
                             text={provider.languages.map((l) => l === 'en' ? '🇺🇸 English' : '🇲🇽 Spanish').join(' · ')}
                         />
                     </div>
 
-                    {/* CTA */}
-                    {provider.website && (
-                        <button
-                            onClick={handleWebsiteClick}
-                            style={{
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                                padding: '0.875rem', borderRadius: 'var(--radius)',
-                                background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
-                                color: 'var(--navy)', fontWeight: 700, fontSize: '0.9rem',
-                                transition: 'var(--transition)', border: 'none',
-                                marginTop: 'auto',
-                            }}
-                            onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.1)'; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.filter = ''; }}
-                        >
-                            Visit Website <ExternalLink size={15} />
-                        </button>
-                    )}
-                    {!provider.website && provider.phone && (
-                        <a
-                            href={`tel:${provider.phone}`}
-                            style={{
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                                padding: '0.875rem', borderRadius: 'var(--radius)',
-                                background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
-                                color: 'var(--navy)', fontWeight: 700, fontSize: '0.9rem',
-                                marginTop: 'auto',
-                            }}
-                        >
-                            <Phone size={15} /> Call Now
-                        </a>
-                    )}
+                    {/* CTA Buttons */}
+                    <div style={{ display: 'flex', gap: '0.75rem' }}>
+                        {provider.website && (
+                            <button
+                                onClick={handleWebsiteClick}
+                                style={{
+                                    flex: 1,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem',
+                                    padding: '0.8rem 1rem', borderRadius: 'var(--radius)',
+                                    background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
+                                    color: 'var(--navy)', fontWeight: 700, fontSize: '0.85rem',
+                                    transition: 'var(--transition)', border: 'none',
+                                    whiteSpace: 'nowrap',
+                                }}
+                                onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.1)'; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.filter = ''; }}
+                            >
+                                <Globe size={14} /> Visit Website <ExternalLink size={13} />
+                            </button>
+                        )}
+                        {provider.phone && (
+                            <a
+                                href={`tel:${provider.phone}`}
+                                style={{
+                                    flex: provider.website ? '0 0 auto' : 1,
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem',
+                                    padding: '0.8rem 1rem', borderRadius: 'var(--radius)',
+                                    background: provider.website
+                                        ? 'rgba(255,255,255,0.07)'
+                                        : 'linear-gradient(135deg, var(--gold), var(--gold-light))',
+                                    border: provider.website ? '1px solid rgba(255,255,255,0.12)' : 'none',
+                                    color: provider.website ? 'var(--gray-300)' : 'var(--navy)',
+                                    fontWeight: 700, fontSize: '0.85rem',
+                                    whiteSpace: 'nowrap',
+                                    textDecoration: 'none',
+                                }}
+                            >
+                                <Phone size={14} /> Call Now
+                            </a>
+                        )}
+                    </div>
+
+                    {/* Reviews Carousel */}
+                    <ReviewCarousel reviews={reviews} loading={reviewsLoading} />
                 </div>
             </div>
         </>
@@ -167,7 +175,7 @@ function StatBox({ icon, value, label }: { icon: React.ReactNode; value: string;
     );
 }
 
-function DetailRow({ icon, text, href, external }: { icon: React.ReactNode; text: string; href?: string; external?: boolean }) {
+function DetailRow({ icon, text, href }: { icon: React.ReactNode; text: string; href?: string }) {
     const content = (
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', fontSize: '0.85rem', color: href ? 'var(--gold-light)' : 'var(--gray-400)' }}>
             <span style={{ flexShrink: 0, marginTop: 1, color: 'var(--gray-600)' }}>{icon}</span>
@@ -175,7 +183,7 @@ function DetailRow({ icon, text, href, external }: { icon: React.ReactNode; text
         </div>
     );
     if (href) {
-        return <a href={href} target={external ? '_blank' : undefined} rel="noopener noreferrer">{content}</a>;
+        return <a href={href} rel="noopener noreferrer">{content}</a>;
     }
     return content;
 }

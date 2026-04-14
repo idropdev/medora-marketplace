@@ -196,6 +196,15 @@ select option {
 .animate-fade-in     { animation: fadeIn 0.3s ease both; }
 .animate-slide-right { animation: slideInRight 0.3s ease both; }
 
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 0.15; }
+}
+
+/* Review carousel: hide scrollbar but keep scrolling */
+.review-scroll-track::-webkit-scrollbar { display: none; }
+.review-scroll-track { scrollbar-width: none; }
+
 /* ─── Mobile Responsiveness ──────────────────────────── */
 .mobile-only { display: none !important; }
 

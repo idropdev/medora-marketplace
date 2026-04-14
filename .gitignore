@@ -25,3 +25,11 @@ dist-ssr
 
 # Local caches
 scripts/.cache
+
+# ── Secrets & environment files ─────────────────────────────────────────────
+# .env.example is the ONLY env file that should ever be committed.
+# All others contain real credentials and must never reach the remote.
+.env
+.env.*
+!.env.example
+

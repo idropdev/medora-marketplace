@@ -4,11 +4,20 @@ import type { Provider } from '../../types/provider';
 
 const BORDER_CENTER = { lat: 31.738, lng: -106.455 };
 const DEFAULT_ZOOM = 12;
+
+/**
+ * The Google Maps JavaScript API key is intentionally public — it MUST be
+ * sent to the browser for the Maps SDK to authenticate itself.
+ * Protect it by adding HTTP referrer restrictions in Google Cloud Console:
+ *   → APIs & Services → Credentials → [your key] → Application restrictions
+ *   → Set to "HTTP referrers" and add your domain(s).
+ */
 const API_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY ?? '';
 
 if (API_KEY) {
     setOptions({ key: API_KEY, v: 'weekly' });
 }
+
 
 interface MapViewProps {
     providers: Provider[];
@@ -50,6 +59,7 @@ export function MapView({ providers, selectedProvider, onProviderSelect }: MapVi
             try {
                 const { Map } = await importLibrary('maps');
                 await importLibrary('marker'); // ensure marker library is loaded
+                await importLibrary('places'); // ensure places library is loaded for reviews
                 
                 const initialTheme = document.documentElement.getAttribute('data-theme') || 'dark';
                 

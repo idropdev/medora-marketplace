@@ -10,6 +10,23 @@ const defaultFilters: ProviderFilters = {
     minRating: 0,
 };
 
+/**
+ * PostgreSQL stores unquoted column names as all-lowercase.
+ * Supabase therefore returns e.g. `googleplaceid` instead of `googlePlaceId`.
+ * This function normalises any row coming from the DB back to the camelCase
+ * fields our Provider interface expects.
+ */
+function normalizeProvider(row: any): Provider {
+    return {
+        ...row,
+        // camelCase fields the seed script wrote as camelCase keys
+        // (Postgres lowercases them on the way in, so we need to restore them)
+        googlePlaceId: row.googlePlaceId ?? row.googleplaceid ?? undefined,
+        reviewCount:   row.reviewCount   ?? row.reviewcount   ?? 0,
+        imageUrl:      row.imageUrl      ?? row.imageurl      ?? undefined,
+    };
+}
+
 export function useProviders() {
     const [allProviders, setAllProviders] = useState<Provider[]>([]);
     const [filters, setFilters] = useState<ProviderFilters>(defaultFilters);
@@ -38,7 +55,13 @@ export function useProviders() {
 
                 if (mounted && data) {
                     if (data.length > 0) {
-                        setAllProviders(data as Provider[]);
+                        const normalized = data.map(normalizeProvider);
+                        // Debug: log the first provider to verify googlePlaceId is present
+                        if (import.meta.env.DEV) {
+                            const sample = normalized[0] as any;
+                            console.log('[Providers] sample googlePlaceId:', sample?.googlePlaceId);
+                        }
+                        setAllProviders(normalized);
                     } else {
                         console.warn('[Supabase] No providers found in DB, using mock data.');
                         setAllProviders(mockProviders);
