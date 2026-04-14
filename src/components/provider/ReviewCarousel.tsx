@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { GoogleReview } from '../../hooks/useGoogleReviews';
 
 interface ReviewCarouselProps {
@@ -8,6 +9,7 @@ interface ReviewCarouselProps {
 }
 
 export function ReviewCarousel({ reviews, loading }: ReviewCarouselProps) {
+    const { t } = useTranslation();
     const scrollRef = useRef<HTMLDivElement>(null);
     const [canScrollLeft, setCanScrollLeft] = useState(false);
     const [canScrollRight, setCanScrollRight] = useState(true);
@@ -69,7 +71,7 @@ export function ReviewCarousel({ reviews, loading }: ReviewCarouselProps) {
                     color: 'var(--gray-300)', letterSpacing: '0.02em',
                     margin: 0,
                 }}>
-                    ⭐ Top Reviews
+                    {t('drawer.topReviews')}
                 </h3>
 
                 {/* Scroll arrows */}
@@ -221,7 +223,7 @@ function ReviewCard({ review }: { review: GoogleReview }) {
                         fontWeight: 600,
                     }}
                 >
-                    {expanded ? 'Show less' : 'Read more'}
+                    {expanded ? t('drawer.showLess') : t('drawer.readMore')}
                 </button>
             )}
         </div>

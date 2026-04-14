@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import type { ProviderFilters, Specialty } from '../../types/provider';
 import { SpecialtyLabels } from '../../types/provider';
 
@@ -10,21 +11,29 @@ interface FilterBarProps {
 
 const SPECIALTIES = Object.entries(SpecialtyLabels) as [Specialty, string][];
 const RATINGS = [0, 3, 4, 4.5];
-const RATING_LABELS: Record<number, string> = { 0: 'Any', 3: '3+', 4: '4+', 4.5: '4.5+' };
 
 export function FilterBar({ filters, updateFilter, resetFilters, count }: FilterBarProps) {
+    const { t } = useTranslation();
     const hasActive = filters.specialty || filters.country || filters.minRating > 0;
+
+    const RATING_LABELS: Record<number, string> = {
+        0: t('filters.ratingAny'),
+        3: t('filters.rating3'),
+        4: t('filters.rating4'),
+        4.5: t('filters.rating45'),
+    };
 
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {/* Results count + reset */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '0.75rem', color: 'var(--gray-400)' }}>
-                    <strong style={{ color: 'var(--white)' }}>{count}</strong> providers found
-                </span>
+                <span
+                    style={{ fontSize: '0.75rem', color: 'var(--gray-400)' }}
+                    dangerouslySetInnerHTML={{ __html: t('filters.providersFound', { count }) }}
+                />
                 {hasActive && (
                     <button onClick={resetFilters} style={{ fontSize: '0.75rem', color: 'var(--gold)', background: 'none' }}>
-                        Clear filters
+                        {t('filters.clearFilters')}
                     </button>
                 )}
             </div>
@@ -32,14 +41,14 @@ export function FilterBar({ filters, updateFilter, resetFilters, count }: Filter
             {/* Specialty chips */}
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
                 <Chip
-                    label="All"
+                    label={t('filters.allSpecialties')}
                     active={!filters.specialty}
                     onClick={() => updateFilter('specialty', '')}
                 />
-                {SPECIALTIES.map(([key, label]) => (
+                {SPECIALTIES.map(([key]) => (
                     <Chip
                         key={key}
-                        label={label}
+                        label={t(`specialties.${key}`)}
                         active={filters.specialty === key}
                         onClick={() => updateFilter('specialty', filters.specialty === key ? '' : key)}
                     />
@@ -53,9 +62,9 @@ export function FilterBar({ filters, updateFilter, resetFilters, count }: Filter
                     onChange={(e) => updateFilter('country', e.target.value as ProviderFilters['country'])}
                     style={selectStyle}
                 >
-                    <option value="">🌎 Both sides</option>
-                    <option value="US">🇺🇸 El Paso (US)</option>
-                    <option value="MX">🇲🇽 Juárez (MX)</option>
+                    <option value="">{t('filters.bothSides')}</option>
+                    <option value="US">{t('filters.elPaso')}</option>
+                    <option value="MX">{t('filters.juarez')}</option>
                 </select>
 
                 <select

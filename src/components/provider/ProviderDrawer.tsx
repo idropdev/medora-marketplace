@@ -1,6 +1,6 @@
 import { X, Star, MapPin, Phone, Globe, Languages, Zap, CheckCircle, ExternalLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Provider } from '../../types/provider';
-import { SpecialtyLabels } from '../../types/provider';
 import { trackProviderClick } from '../../utils/analytics';
 import { useGoogleReviews } from '../../hooks/useGoogleReviews';
 import { ReviewCarousel } from './ReviewCarousel';
@@ -11,6 +11,7 @@ interface ProviderDrawerProps {
 }
 
 export function ProviderDrawer({ provider, onClose }: ProviderDrawerProps) {
+    const { t } = useTranslation();
     const { reviews, loading: reviewsLoading } = useGoogleReviews(provider?.googlePlaceId);
 
     if (!provider) return null;
@@ -19,6 +20,8 @@ export function ProviderDrawer({ provider, onClose }: ProviderDrawerProps) {
         trackProviderClick(provider);
         window.open(provider.website, '_blank', 'noopener');
     };
+
+    const specialtyLabel = (s: string) => t(`specialties.${s}`, { defaultValue: s });
 
     return (
         <>
@@ -60,7 +63,7 @@ export function ProviderDrawer({ provider, onClose }: ProviderDrawerProps) {
                                         background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
                                         color: 'var(--navy)', fontSize: '0.7rem', fontWeight: 700,
                                     }}>
-                                        <Zap size={10} /> PROMOTED
+                                        <Zap size={10} /> {t('drawer.promoted')}
                                     </span>
                                 )}
                                 {provider.verified && (
@@ -70,7 +73,7 @@ export function ProviderDrawer({ provider, onClose }: ProviderDrawerProps) {
                                         background: 'rgba(34,197,94,0.15)', color: '#4ade80',
                                         fontSize: '0.7rem', fontWeight: 600,
                                     }}>
-                                        <CheckCircle size={10} /> Verified
+                                        <CheckCircle size={10} /> {t('drawer.verified')}
                                     </span>
                                 )}
                                 <span style={{
@@ -79,13 +82,13 @@ export function ProviderDrawer({ provider, onClose }: ProviderDrawerProps) {
                                     color: provider.country === 'MX' ? '#4ade80' : '#93c5fd',
                                     fontSize: '0.7rem', fontWeight: 600,
                                 }}>
-                                    {provider.country === 'MX' ? '🇲🇽 Ciudad Juárez' : '🇺🇸 El Paso'}
+                                    {provider.country === 'MX' ? t('drawer.ciudadJuarez') : t('drawer.elPaso')}
                                 </span>
                             </div>
 
                             <h2 style={{ fontSize: '1.15rem', fontWeight: 700, lineHeight: 1.3 }}>{provider.name}</h2>
                             <p style={{ fontSize: '0.8rem', color: 'var(--gray-400)', marginTop: '0.25rem' }}>
-                                {provider.specialty.map((s) => SpecialtyLabels[s]).join(' · ')}
+                                {provider.specialty.map(specialtyLabel).join(' · ')}
                             </p>
                         </div>
                         <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 8, padding: '0.4rem', color: 'var(--gray-400)', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
@@ -98,11 +101,11 @@ export function ProviderDrawer({ provider, onClose }: ProviderDrawerProps) {
                 <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', flex: 1 }}>
                     {/* Rating */}
                     <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 'var(--radius)', padding: '1rem', display: 'flex', justifyContent: 'space-around' }}>
-                        <StatBox icon={<Star size={18} style={{ color: 'var(--gold)', fill: 'var(--gold)' }} />} value={provider.rating.toFixed(1)} label="Rating" />
+                        <StatBox icon={<Star size={18} style={{ color: 'var(--gold)', fill: 'var(--gold)' }} />} value={provider.rating.toFixed(1)} label={t('drawer.rating')} />
                         <div style={{ width: 1, background: 'rgba(255,255,255,0.08)' }} />
-                        <StatBox icon={<span style={{ fontSize: '1.1rem' }}>💬</span>} value={provider.reviewCount.toLocaleString()} label="Reviews" />
+                        <StatBox icon={<span style={{ fontSize: '1.1rem' }}>💬</span>} value={provider.reviewCount.toLocaleString()} label={t('drawer.reviews')} />
                         <div style={{ width: 1, background: 'rgba(255,255,255,0.08)' }} />
-                        <StatBox icon={<span style={{ fontSize: '1.1rem' }}>👁</span>} value={provider.clicks.toLocaleString()} label="Profile views" />
+                        <StatBox icon={<span style={{ fontSize: '1.1rem' }}>👁</span>} value={provider.clicks.toLocaleString()} label={t('drawer.profileViews')} />
                     </div>
 
                     {/* Contact Info */}
@@ -111,7 +114,7 @@ export function ProviderDrawer({ provider, onClose }: ProviderDrawerProps) {
                         {provider.phone && <DetailRow icon={<Phone size={15} />} text={provider.phone} href={`tel:${provider.phone}`} />}
                         <DetailRow
                             icon={<Languages size={15} />}
-                            text={provider.languages.map((l) => l === 'en' ? '🇺🇸 English' : '🇲🇽 Spanish').join(' · ')}
+                            text={provider.languages.map((l) => l === 'en' ? t('drawer.languageEN') : t('drawer.languageES')).join(' · ')}
                         />
                     </div>
 
@@ -132,7 +135,7 @@ export function ProviderDrawer({ provider, onClose }: ProviderDrawerProps) {
                                 onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.1)'; }}
                                 onMouseLeave={(e) => { e.currentTarget.style.filter = ''; }}
                             >
-                                <Globe size={14} /> Visit Website <ExternalLink size={13} />
+                                <Globe size={14} /> {t('drawer.visitWebsite')} <ExternalLink size={13} />
                             </button>
                         )}
                         {provider.phone && (
@@ -152,7 +155,7 @@ export function ProviderDrawer({ provider, onClose }: ProviderDrawerProps) {
                                     textDecoration: 'none',
                                 }}
                             >
-                                <Phone size={14} /> Call Now
+                                <Phone size={14} /> {t('drawer.callNow')}
                             </a>
                         )}
                     </div>

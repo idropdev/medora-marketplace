@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, ChevronRight, Zap, CheckCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { mockProviders } from '../data/providers';
 
 const totalProviders = mockProviders.length;
@@ -8,6 +9,7 @@ const avgRating = (mockProviders.reduce((s, p) => s + p.rating, 0) / totalProvid
 const totalClicks = mockProviders.reduce((s, p) => s + p.clicks, 0);
 
 export function SalesPage() {
+    const { t } = useTranslation();
     const [mousePos, setMousePos] = useState({ x: 50, y: 0 });
 
     const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
@@ -36,13 +38,12 @@ export function SalesPage() {
                 </svg>
 
                 <div style={{ textAlign: 'center', maxWidth: 720, position: 'relative', zIndex: 1 }}>
-
                     <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 800, lineHeight: 1.1, marginBottom: '1rem', letterSpacing: '-0.03em' }}>
-                        Put your practice<br />
-                        <span style={{ background: 'linear-gradient(135deg, #C9A84C, #e0c075)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>on the map</span>
+                        {t('sales.heroTitle')}<br />
+                        <span style={{ background: 'linear-gradient(135deg, #C9A84C, #e0c075)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{t('sales.heroTitleHighlight')}</span>
                     </h1>
                     <p style={{ fontSize: '1.15rem', color: 'var(--gray-400)', marginBottom: '2.5rem', lineHeight: 1.7, maxWidth: 560, margin: '0 auto 2.5rem' }}>
-                        Medora is the first healthcare directory built specifically for the El Paso–Juárez border. Get discovered by thousands of US patients actively looking for care in Juárez.
+                        {t('sales.heroSubtitle')}
                     </p>
 
                     <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -52,7 +53,7 @@ export function SalesPage() {
                             background: 'linear-gradient(135deg, #C9A84C, #e0c075)',
                             color: 'var(--navy)', fontWeight: 700, fontSize: '0.95rem',
                         }}>
-                            Get Listed Free <ChevronRight size={18} />
+                            {t('sales.heroCtaPrimary')} <ChevronRight size={18} />
                         </a>
                         <Link to="/" style={{
                             display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
@@ -60,7 +61,7 @@ export function SalesPage() {
                             background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
                             color: 'var(--white)', fontWeight: 600, fontSize: '0.95rem',
                         }}>
-                            <MapPin size={16} /> View the Map
+                            <MapPin size={16} /> {t('sales.heroCtaSecondary')}
                         </Link>
                     </div>
                 </div>
@@ -70,10 +71,10 @@ export function SalesPage() {
             <section style={{ background: 'rgba(255,255,255,0.03)', borderTop: '1px solid rgba(255,255,255,0.07)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '3rem 1.5rem' }}>
                 <Reveal delay={0.1}>
                     <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '2rem', textAlign: 'center' }}>
-                        <StatTile icon="🏥" value={`${totalProviders}+`} label="Providers Listed" />
-                        <StatTile icon="👁" value={totalClicks.toLocaleString()} label="Profile Views" />
-                        <StatTile icon="⭐" value={avgRating} label="Avg Rating" />
-                        <StatTile icon="🌎" value="2 Cities" label="El Paso + Juárez" />
+                        <StatTile icon="🏥" value={`${totalProviders}+`} label={t('sales.statsProviders')} />
+                        <StatTile icon="👁" value={totalClicks.toLocaleString()} label={t('sales.statsViews')} />
+                        <StatTile icon="⭐" value={avgRating} label={t('sales.statsRating')} />
+                        <StatTile icon="🌎" value="2" label={t('sales.statsCities')} />
                     </div>
                 </Reveal>
             </section>
@@ -83,13 +84,13 @@ export function SalesPage() {
                 <Reveal delay={0.1}>
                     <div style={{ maxWidth: 900, margin: '0 auto' }}>
                         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-                            <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>How it works</h2>
-                            <p style={{ color: 'var(--gray-400)', maxWidth: 480, margin: '0 auto' }}>Three steps to start receiving new patients from across the border.</p>
+                            <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>{t('sales.howTitle')}</h2>
+                            <p style={{ color: 'var(--gray-400)', maxWidth: 480, margin: '0 auto' }}>{t('sales.howSubtitle')}</p>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
-                            <StepCard step="1" icon="📋" title="Create your profile" body="Add your name, specialties, location, and contact info. It takes under 5 minutes and is completely free." />
-                            <StepCard step="2" icon="🗺️" title="Appear on the map" body="Your clinic shows up to US patients searching for care in Juárez — no SEO knowledge required." />
-                            <StepCard step="3" icon="📈" title="Track your leads" body="See how many people view your profile each month. Use that data to understand your reach." />
+                            <StepCard step="1" icon="📋" title={t('sales.step1Title')} body={t('sales.step1Body')} />
+                            <StepCard step="2" icon="🗺️" title={t('sales.step2Title')} body={t('sales.step2Body')} />
+                            <StepCard step="3" icon="📈" title={t('sales.step3Title')} body={t('sales.step3Body')} />
                         </div>
                     </div>
                 </Reveal>
@@ -100,41 +101,30 @@ export function SalesPage() {
                 <Reveal delay={0.1}>
                     <div style={{ maxWidth: 800, margin: '0 auto' }}>
                         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-                            <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>Simple pricing</h2>
-                            <p style={{ color: 'var(--gray-400)' }}>Start for free. Upgrade when you see results.</p>
+                            <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>{t('sales.pricingTitle')}</h2>
+                            <p style={{ color: 'var(--gray-400)' }}>{t('sales.pricingSubtitle')}</p>
                         </div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
                             <PricingCard
-                                tier="Free Listing"
+                                tier={t('sales.freeTier')}
                                 price="$0"
-                                period="forever"
+                                period={t('sales.freePeriod')}
                                 color="rgba(255,255,255,0.06)"
                                 border="rgba(255,255,255,0.1)"
-                                features={[
-                                    'Appear on the Medora map',
-                                    'Name, specialty & contact info',
-                                    'Monthly profile view count',
-                                    'EN + ES visibility',
-                                ]}
-                                cta="Get listed"
+                                features={[t('sales.freeF1'), t('sales.freeF2'), t('sales.freeF3'), t('sales.freeF4')]}
+                                cta={t('sales.freeCta')}
                                 ctaHref="mailto:hello@medora.com"
                                 ctaStyle="outline"
                             />
                             <PricingCard
-                                tier="Promoted Listing"
+                                tier={t('sales.proTier')}
                                 price="$49"
-                                period="/ month"
+                                period={t('sales.proPeriod')}
                                 color="rgba(201,168,76,0.08)"
                                 border="rgba(201,168,76,0.35)"
-                                badge="Most Popular"
-                                features={[
-                                    'Everything in Free',
-                                    'Gold promoted pin on map',
-                                    'Priority in search results',
-                                    'Detailed analytics dashboard',
-                                    'Featured in weekly digest',
-                                ]}
-                                cta="Start free trial"
+                                badge={t('sales.proBadge')}
+                                features={[t('sales.proF1'), t('sales.proF2'), t('sales.proF3'), t('sales.proF4'), t('sales.proF5')]}
+                                cta={t('sales.proCta')}
                                 ctaHref="mailto:hello@medora.com"
                                 ctaStyle="gold"
                             />
@@ -147,8 +137,8 @@ export function SalesPage() {
             <section style={{ padding: '5rem 1.5rem' }}>
                 <Reveal delay={0.2}>
                     <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
-                        <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>Who we serve</h2>
-                        <p style={{ color: 'var(--gray-400)', marginBottom: '2.5rem', maxWidth: 500, margin: '0 auto 2.5rem' }}>Any healthcare or wellness provider near the border can list on Medora.</p>
+                        <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>{t('sales.whoTitle')}</h2>
+                        <p style={{ color: 'var(--gray-400)', marginBottom: '2.5rem', maxWidth: 500, margin: '0 auto 2.5rem' }}>{t('sales.whoSubtitle')}</p>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center' }}>
                             {[['🦷', 'Dentistry'], ['😁', 'Orthodontics'], ['💉', 'Plastic Surgery'], ['✨', 'Aesthetics'], ['👶', 'OB/GYN'], ['🏃', 'Physical Therapy'], ['💆', 'Massage'], ['👁', 'Optometry'], ['❤️', 'Cardiology'], ['🏥', 'General Practice']].map(([emoji, label]) => (
                                 <div key={label} className="hover-lift" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.1rem', borderRadius: 'var(--radius-pill)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.875rem', cursor: 'pointer' }}>
@@ -164,15 +154,15 @@ export function SalesPage() {
             <section style={{ padding: '5rem 1.5rem', background: 'linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05))' }}>
                 <Reveal delay={0.1}>
                     <div style={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
-                        <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '1rem' }}>Ready to get discovered?</h2>
-                        <p style={{ color: 'var(--gray-400)', marginBottom: '2rem' }}>Medical tourism you can trust — starting with your practice.</p>
+                        <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '1rem' }}>{t('sales.ctaBannerTitle')}</h2>
+                        <p style={{ color: 'var(--gray-400)', marginBottom: '2rem' }}>{t('sales.ctaBannerSubtitle')}</p>
                         <a href="mailto:hello@medora.com" className="hover-lift" style={{
                             display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
                             padding: '1rem 2rem', borderRadius: 'var(--radius-pill)',
                             background: 'linear-gradient(135deg, #C9A84C, #e0c075)',
                             color: 'var(--navy)', fontWeight: 700, fontSize: '1rem',
                         }}>
-                            Contact the Medora team <ChevronRight size={18} />
+                            {t('sales.ctaBannerBtn')} <ChevronRight size={18} />
                         </a>
                     </div>
                 </Reveal>
@@ -180,7 +170,7 @@ export function SalesPage() {
 
             {/* Footer */}
             <footer style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '1.5rem', textAlign: 'center', color: 'var(--gray-400)', fontSize: '0.8rem' }}>
-                © {new Date().getFullYear()} Medora · Medical tourism you can trust · El Paso–Juárez
+                {t('sales.footer', { year: new Date().getFullYear() })}
             </footer>
         </div>
     );
@@ -261,7 +251,6 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
                 observer.unobserve(entry.target);
             }
         }, { threshold: 0.1, rootMargin: '50px' });
-        
         observer.observe(ref.current);
         return () => observer.disconnect();
     }, []);

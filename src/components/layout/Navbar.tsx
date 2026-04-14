@@ -1,9 +1,11 @@
 import { MapPin, Sun, Moon } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function Navbar() {
     const { pathname } = useLocation();
+    const { t, i18n } = useTranslation();
     const [theme, setTheme] = useState<string>(
         () => localStorage.getItem('theme') || 'dark'
     );
@@ -12,6 +14,12 @@ export function Navbar() {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
     }, [theme]);
+
+    const toggleLanguage = () => {
+        i18n.changeLanguage(i18n.language.startsWith('es') ? 'en' : 'es');
+    };
+
+    const isSpanish = i18n.language.startsWith('es');
 
     return (
         <nav style={{
@@ -30,28 +38,50 @@ export function Navbar() {
         }}>
             {/* Logo */}
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <div style={{
-                    width: 32, height: 32, borderRadius: 8,
-                    background: 'linear-gradient(135deg, #C9A84C, #e0c075)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}>
-                    <MapPin size={16} color="#0B1F3A" strokeWidth={2.5} />
-                </div>
+                <img
+                    src="/logo.png"
+                    alt="Medora"
+                    style={{ width: 32, height: 32, objectFit: 'contain' }}
+                />
                 <span style={{ fontWeight: 700, fontSize: '1.1rem', letterSpacing: '-0.02em' }}>
                     med<span style={{ color: 'var(--gold)' }}>ora</span>
                 </span>
             </Link>
 
-            {/* Nav Links */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+            {/* Nav Links + Controls */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    <NavLink to="/" label="Find Providers" active={pathname === '/'} />
-                    <NavLink to="/sales" label="For Providers" active={pathname === '/sales'} />
+                    <NavLink to="/" label={t('nav.findProviders')} active={pathname === '/'} />
+                    <NavLink to="/sales" label={t('nav.forProviders')} active={pathname === '/sales'} />
                 </div>
-                
+
+                {/* Language toggle */}
+                <button
+                    onClick={toggleLanguage}
+                    title={isSpanish ? 'Switch to English' : 'Cambiar a Español'}
+                    style={{
+                        background: 'var(--surface)',
+                        border: '1px solid var(--border)',
+                        color: 'var(--white)',
+                        padding: '0.25rem 0.6rem',
+                        borderRadius: 'var(--radius-pill)',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        letterSpacing: '0.03em',
+                        transition: 'var(--transition)',
+                        whiteSpace: 'nowrap',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--gold)'; e.currentTarget.style.color = 'var(--gold)'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.color = 'var(--white)'; }}
+                >
+                    {isSpanish ? '🇺🇸 EN' : '🇲🇽 ES'}
+                </button>
+
+                {/* Theme toggle */}
                 <button
                     onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')}
-                    title="Toggle Theme"
+                    title={t('nav.toggleTheme')}
                     style={{
                         background: 'var(--surface)',
                         border: '1px solid var(--border)',

@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useProviders } from '../hooks/useProviders';
 import { MapPin, List } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { SearchBar } from '../components/search/SearchBar';
 import { FilterBar } from '../components/search/FilterBar';
 import { ProviderCard } from '../components/provider/ProviderCard';
@@ -10,6 +11,7 @@ import { MapView } from '../components/map/MapView';
 import { trackProviderClick } from '../utils/analytics';
 
 export function MapPage() {
+    const { t } = useTranslation();
     const { providers, filters, updateFilter, resetFilters, selectedProvider, setSelectedProvider, loading } = useProviders();
     const [mobileView, setMobileView] = useState<'map' | 'list'>('map');
     const sidebarRef = useRef<HTMLDivElement>(null);
@@ -17,7 +19,7 @@ export function MapPage() {
     const rowVirtualizer = useVirtualizer({
         count: providers.length,
         getScrollElement: () => sidebarRef.current,
-        estimateSize: () => 105, // Height of card (~95px) + gap
+        estimateSize: () => 105,
         overscan: 5,
     });
 
@@ -53,42 +55,33 @@ export function MapPage() {
                     ) : providers.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '3rem 1rem', color: 'var(--gray-400)', fontSize: '0.875rem' }}>
                             <p style={{ fontSize: '2rem', marginBottom: '1rem' }}>🔍</p>
-                            <p style={{ marginBottom: '0.5rem' }}>No providers match your filters.</p>
+                            <p style={{ marginBottom: '0.5rem' }}>{t('map.noResults')}</p>
                             <button onClick={resetFilters} style={{ color: 'var(--gold)', background: 'none', fontSize: '0.875rem', marginBottom: '1.5rem', fontWeight: 600 }}>
-                                Clear filters
+                                {t('filters.clearFilters')}
                             </button>
                             <div style={{ paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
-                                <p style={{ marginBottom: '0.75rem' }}>Know a clinic that should be here?</p>
+                                <p style={{ marginBottom: '0.75rem' }}>{t('map.suggestClinic')}</p>
                                 <a href="mailto:hello@medora.com?subject=Suggest%20a%20Clinic" style={{
                                     display: 'inline-flex', padding: '0.5rem 1rem', borderRadius: 'var(--radius-pill)',
                                     background: 'var(--surface)', border: '1px solid var(--border)',
                                     color: 'var(--white)', fontWeight: 600, fontSize: '0.85rem'
                                 }}>
-                                    Suggest a Clinic
+                                    {t('map.suggestBtn')}
                                 </a>
                             </div>
                         </div>
                     ) : (
-                        <div
-                            style={{
-                                height: `${rowVirtualizer.getTotalSize()}px`,
-                                width: '100%',
-                                position: 'relative',
-                            }}
-                        >
+                        <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: '100%', position: 'relative' }}>
                             {rowVirtualizer.getVirtualItems().map((virtualRow) => {
                                 const p = providers[virtualRow.index];
                                 return (
                                     <div
                                         key={virtualRow.index}
                                         style={{
-                                            position: 'absolute',
-                                            top: 0,
-                                            left: 0,
-                                            width: '100%',
+                                            position: 'absolute', top: 0, left: 0, width: '100%',
                                             height: `${virtualRow.size}px`,
                                             transform: `translateY(${virtualRow.start}px)`,
-                                            paddingBottom: '0.5rem', // Replaces the gap
+                                            paddingBottom: '0.5rem',
                                         }}
                                     >
                                         <ProviderCard
@@ -109,11 +102,9 @@ export function MapPage() {
                 {loading && (
                     <div style={{
                         position: 'absolute', inset: 0,
-                        backgroundColor: 'var(--navy)',
-                        zIndex: 20,
+                        backgroundColor: 'var(--navy)', zIndex: 20,
                         display: 'flex', flexDirection: 'column',
-                        alignItems: 'center', justifyContent: 'center',
-                        gap: '1.5rem'
+                        alignItems: 'center', justifyContent: 'center', gap: '1.5rem'
                     }}>
                         <div style={{
                             width: 64, height: 64, borderRadius: 18,
@@ -125,7 +116,7 @@ export function MapPage() {
                             <MapPin size={34} color="#0B1F3A" strokeWidth={2.5} />
                         </div>
                         <p style={{ color: 'var(--gold)', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase', fontSize: '0.85rem', animation: 'fadeIn 1s ease' }}>
-                            Loading medical data...
+                            {t('map.loading')}
                         </p>
                     </div>
                 )}
@@ -151,13 +142,13 @@ export function MapPage() {
                     zIndex: 100, padding: '0.875rem 1.5rem', borderRadius: 'var(--radius-pill)',
                     background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
                     color: 'var(--navy)', fontWeight: 700, fontSize: '0.95rem',
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.4)', border: 'none', alignItems: 'center', gap: '0.5rem'
+                    boxShadow: '0 8px 32px rgba(0,0,0,0.4)', border: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem'
                 }}
             >
                 {mobileView === 'map' ? (
-                    <><List size={18} /> View List</>
+                    <><List size={18} /> {t('map.viewList')}</>
                 ) : (
-                    <><MapPin size={18} /> View Map</>
+                    <><MapPin size={18} /> {t('map.viewMap')}</>
                 )}
             </button>
         </div>
