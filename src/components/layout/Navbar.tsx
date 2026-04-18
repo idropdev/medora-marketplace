@@ -1,4 +1,4 @@
-import { MapPin, Sun, Moon } from 'lucide-react';
+import { Sun, Moon } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';

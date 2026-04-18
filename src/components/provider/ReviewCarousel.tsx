@@ -118,6 +118,7 @@ export function ReviewCarousel({ reviews, loading }: ReviewCarouselProps) {
 
 /* ── Individual review card ───────────────────────────────────────────── */
 function ReviewCard({ review }: { review: GoogleReview }) {
+    const { t } = useTranslation();
     const [expanded, setExpanded] = useState(false);
     const isLong = review.text.length > 120;
 
