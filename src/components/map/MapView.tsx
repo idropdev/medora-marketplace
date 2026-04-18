@@ -71,7 +71,6 @@ export function MapView({ providers, selectedProvider, onProviderSelect }: MapVi
                     mapTypeControl: false,
                     fullscreenControl: false,
                     styles: initialTheme === 'light' ? lightMapStyles : darkMapStyles,
-                    mapId: 'DEMO_MAP_ID', // Recommended for advanced features
                 });
                 
                 if (isMounted) {
@@ -101,7 +100,7 @@ export function MapView({ providers, selectedProvider, onProviderSelect }: MapVi
 
         observer.observe(document.documentElement, { attributes: true });
         return () => observer.disconnect();
-    }, []);
+    }, [mapInstance]);
 
     // ── Sync markers ───────────────────────────────────────────────────────
     useEffect(() => {
