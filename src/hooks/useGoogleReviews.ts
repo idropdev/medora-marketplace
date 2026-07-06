@@ -49,8 +49,9 @@ export function useGoogleReviews(placeId?: string) {
 
     useEffect(() => {
         if (!placeId) {
-            setReviews([]);
-            setStatus('no-place-id');
+            console.warn('[useGoogleReviews] No placeId provided. Loading mock reviews fallback.');
+            setReviews(mockGoogleReviews);
+            setStatus('no-place-id-fallback');
             return;
         }
 
