@@ -169,7 +169,7 @@ export function MapView({ providers, selectedProvider, onProviderSelect }: MapVi
                 console.warn('[MapView] Error: The Geolocation service failed.');
             }
         );
-    }, []);
+    }, [mapInstance]);
 
     // ── Sync User Marker ───────────────────────────────────────────────────
     useEffect(() => {
@@ -193,7 +193,7 @@ export function MapView({ providers, selectedProvider, onProviderSelect }: MapVi
         } else {
             userMarkerRef.current.setPosition(userLoc);
         }
-    }, [userLoc]);
+    }, [userLoc, mapInstance]);
 
     // ── No API key — show visual placeholder ──────────────────────────────
     if (!API_KEY) {
