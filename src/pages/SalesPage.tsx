@@ -47,7 +47,7 @@ export function SalesPage() {
                     </p>
 
                     <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <a href="mailto:hello@medora.com" style={{
+                        <a href="mailto:hello@medsociety.one" style={{
                             display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
                             padding: '0.875rem 1.75rem', borderRadius: 'var(--radius-pill)',
                             background: 'linear-gradient(135deg, #C9A84C, #e0c075)',
@@ -113,7 +113,7 @@ export function SalesPage() {
                                 border="rgba(255,255,255,0.1)"
                                 features={[t('sales.freeF1'), t('sales.freeF2'), t('sales.freeF3'), t('sales.freeF4')]}
                                 cta={t('sales.freeCta')}
-                                ctaHref="mailto:hello@medora.com"
+                                ctaHref="mailto:hello@medsociety.one"
                                 ctaStyle="outline"
                             />
                             <PricingCard
@@ -125,7 +125,7 @@ export function SalesPage() {
                                 badge={t('sales.proBadge')}
                                 features={[t('sales.proF1'), t('sales.proF2'), t('sales.proF3'), t('sales.proF4'), t('sales.proF5')]}
                                 cta={t('sales.proCta')}
-                                ctaHref="mailto:hello@medora.com"
+                                ctaHref="mailto:hello@medsociety.one"
                                 ctaStyle="gold"
                             />
                         </div>
@@ -156,7 +156,7 @@ export function SalesPage() {
                     <div style={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
                         <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '1rem' }}>{t('sales.ctaBannerTitle')}</h2>
                         <p style={{ color: 'var(--gray-400)', marginBottom: '2rem' }}>{t('sales.ctaBannerSubtitle')}</p>
-                        <a href="mailto:hello@medora.com" className="hover-lift" style={{
+                        <a href="mailto:hello@medsociety.one" className="hover-lift" style={{
                             display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
                             padding: '1rem 2rem', borderRadius: 'var(--radius-pill)',
                             background: 'linear-gradient(135deg, #C9A84C, #e0c075)',

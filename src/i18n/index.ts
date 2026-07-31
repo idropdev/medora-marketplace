@@ -18,7 +18,7 @@ i18n
         detection: {
             order: ['localStorage', 'navigator'],
             caches: ['localStorage'],
-            lookupLocalStorage: 'medora-language',
+            lookupLocalStorage: 'medsociety-language',
         },
         interpolation: {
             escapeValue: false, // React already escapes

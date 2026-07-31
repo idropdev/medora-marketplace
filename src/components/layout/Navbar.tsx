@@ -40,11 +40,11 @@ export function Navbar() {
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <img
                     src="/logo.png"
-                    alt="Medora"
+                    alt="MedSociety"
                     style={{ width: 32, height: 32, objectFit: 'contain' }}
                 />
                 <span style={{ fontWeight: 700, fontSize: '1.1rem', letterSpacing: '-0.02em' }}>
-                    med<span style={{ color: 'var(--gold)' }}>ora</span>
+                    med<span style={{ color: 'var(--gold)' }}>society</span>
                 </span>
             </Link>
 

@@ -63,7 +63,7 @@
   "sales": {
     "heroTitle": "Pon tu consultorio",
     "heroTitleHighlight": "en el mapa",
-    "heroSubtitle": "Medora es el primer directorio de salud diseñado para la frontera El Paso–Juárez. Sé descubierto por miles de pacientes estadounidenses que buscan atención médica en Juárez.",
+    "heroSubtitle": "MedSociety es el primer directorio de salud diseñado para la frontera El Paso–Juárez. Sé descubierto por miles de pacientes estadounidenses que buscan atención médica en Juárez.",
     "heroCtaPrimary": "Regístrate Gratis",
     "heroCtaSecondary": "Ver el Mapa",
     "statsProviders": "Proveedores listados",
@@ -82,7 +82,7 @@
     "pricingSubtitle": "Empieza gratis. Mejora tu plan cuando veas resultados.",
     "freeTier": "Listado Gratuito",
     "freePeriod": "para siempre",
-    "freeF1": "Aparecer en el mapa de Medora",
+    "freeF1": "Aparecer en el mapa de MedSociety",
     "freeF2": "Nombre, especialidad e información de contacto",
     "freeF3": "Contador mensual de vistas al perfil",
     "freeF4": "Visibilidad en EN + ES",
@@ -97,10 +97,10 @@
     "proF5": "Presentado en el resumen semanal",
     "proCta": "Iniciar prueba gratis",
     "whoTitle": "A quién servimos",
-    "whoSubtitle": "Cualquier proveedor de salud o bienestar cerca de la frontera puede listarse en Medora.",
+    "whoSubtitle": "Cualquier proveedor de salud o bienestar cerca de la frontera puede listarse en MedSociety.",
     "ctaBannerTitle": "¿Listo para ser descubierto?",
     "ctaBannerSubtitle": "Turismo médico en el que puedes confiar — comenzando con tu consultorio.",
-    "ctaBannerBtn": "Contactar al equipo de Medora",
-    "footer": "© {{year}} Medora · Turismo médico en el que puedes confiar · El Paso–Juárez"
+    "ctaBannerBtn": "Contactar al equipo de MedSociety",
+    "footer": "© {{year}} MedSociety · Turismo médico en el que puedes confiar · El Paso–Juárez"
   }
 }

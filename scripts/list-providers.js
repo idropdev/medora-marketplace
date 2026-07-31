@@ -70,7 +70,7 @@ async function displayBreakdown() {
     const totalClicks = providers.reduce((sum, p) => sum + (p.clicks || 0), 0);
 
     console.log('====================================================');
-    console.log('       🏥  MEDORA CLINICS DATABASE METRICS  🏥       ');
+    console.log('       🏥  MEDSOCIETY CLINICS DATABASE METRICS  🏥       ');
     console.log('====================================================');
     console.log(`📊 Total Registered Clinics : ${total}`);
     console.log(`⭐ Average Rating            : ${avgRating} / 5.0`);

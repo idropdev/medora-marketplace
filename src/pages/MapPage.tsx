@@ -61,7 +61,7 @@ export function MapPage() {
                             </button>
                             <div style={{ paddingTop: '1.5rem', borderTop: '1px solid var(--border)' }}>
                                 <p style={{ marginBottom: '0.75rem' }}>{t('map.suggestClinic')}</p>
-                                <a href="mailto:hello@medora.com?subject=Suggest%20a%20Clinic" style={{
+                                <a href="mailto:hello@medsociety.one?subject=Suggest%20a%20Clinic" style={{
                                     display: 'inline-flex', padding: '0.5rem 1rem', borderRadius: 'var(--radius-pill)',
                                     background: 'var(--surface)', border: '1px solid var(--border)',
                                     color: 'var(--white)', fontWeight: 600, fontSize: '0.85rem'
