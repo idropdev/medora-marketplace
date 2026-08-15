@@ -104,7 +104,7 @@ export function SalesPage() {
                             <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>{t('sales.pricingTitle')}</h2>
                             <p style={{ color: 'var(--gray-400)' }}>{t('sales.pricingSubtitle')}</p>
                         </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
                             <PricingCard
                                 tier={t('sales.freeTier')}
                                 price="$0"
@@ -112,9 +112,6 @@ export function SalesPage() {
                                 color="rgba(255,255,255,0.06)"
                                 border="rgba(255,255,255,0.1)"
                                 features={[t('sales.freeF1'), t('sales.freeF2'), t('sales.freeF3'), t('sales.freeF4')]}
-                                cta={t('sales.freeCta')}
-                                ctaHref="mailto:hello@medsociety.one"
-                                ctaStyle="outline"
                             />
                             <PricingCard
                                 tier={t('sales.proTier')}
@@ -124,10 +121,19 @@ export function SalesPage() {
                                 border="rgba(201,168,76,0.35)"
                                 badge={t('sales.proBadge')}
                                 features={[t('sales.proF1'), t('sales.proF2'), t('sales.proF3'), t('sales.proF4'), t('sales.proF5')]}
-                                cta={t('sales.proCta')}
-                                ctaHref="mailto:hello@medsociety.one"
-                                ctaStyle="gold"
+                                priceColor="var(--gold)"
                             />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>
+                            <a href="https://pricing.medsociety.one/" className="hover-lift" style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                padding: '1rem 2.25rem', borderRadius: 'var(--radius-pill)',
+                                background: 'linear-gradient(135deg, #C9A84C, #e0c075)',
+                                color: 'var(--navy)', fontWeight: 700, fontSize: '1rem',
+                                boxShadow: '0 4px 20px rgba(201, 168, 76, 0.25)'
+                            }}>
+                                {t('sales.pricingCta')} <ChevronRight size={18} />
+                            </a>
                         </div>
                     </div>
                 </Reveal>
@@ -199,9 +205,9 @@ function StepCard({ step, icon, title, body }: { step: string; icon: string; tit
     );
 }
 
-function PricingCard({ tier, price, period, color, border, badge, features, cta, ctaHref, ctaStyle }: {
+function PricingCard({ tier, price, period, color, border, badge, features, priceColor = 'var(--white)' }: {
     tier: string; price: string; period: string; color: string; border: string;
-    badge?: string; features: string[]; cta: string; ctaHref: string; ctaStyle: 'gold' | 'outline';
+    badge?: string; features: string[]; priceColor?: string;
 }) {
     return (
         <div className="hover-lift" style={{ padding: '2rem', borderRadius: 'var(--radius)', background: color, border: `1px solid ${border}`, display: 'flex', flexDirection: 'column', gap: '1.25rem', position: 'relative' }}>
@@ -213,7 +219,7 @@ function PricingCard({ tier, price, period, color, border, badge, features, cta,
             <div>
                 <p style={{ fontSize: '0.8rem', color: 'var(--gray-400)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>{tier}</p>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.35rem' }}>
-                    <span style={{ fontSize: '2.5rem', fontWeight: 800, color: ctaStyle === 'gold' ? 'var(--gold)' : 'var(--white)' }}>{price}</span>
+                    <span style={{ fontSize: '2.5rem', fontWeight: 800, color: priceColor }}>{price}</span>
                     <span style={{ color: 'var(--gray-400)', fontSize: '0.875rem' }}>{period}</span>
                 </div>
             </div>
@@ -225,16 +231,6 @@ function PricingCard({ tier, price, period, color, border, badge, features, cta,
                     </li>
                 ))}
             </ul>
-            <a href={ctaHref} style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                padding: '0.75rem', borderRadius: 'var(--radius)',
-                background: ctaStyle === 'gold' ? 'linear-gradient(135deg,#C9A84C,#e0c075)' : 'rgba(255,255,255,0.08)',
-                border: ctaStyle === 'outline' ? '1px solid rgba(255,255,255,0.15)' : 'none',
-                color: ctaStyle === 'gold' ? 'var(--navy)' : 'var(--white)',
-                fontWeight: 700, fontSize: '0.9rem',
-            }}>
-                {cta}
-            </a>
         </div>
     );
 }
