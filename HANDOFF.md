@@ -102,14 +102,37 @@ dist/                       Build output (gitignored territory; present locally 
 - **Vercel** — deployment target; `vercel.json` only configures SPA fallback routing, no other Vercel-specific config found.
 - All four env var names above are documented with setup instructions in `.env.example`. `.env.local` exists locally and is correctly gitignored (verified not tracked by git); do not commit it.
 
-## 9. Known Issues & TODOs
+## 9. Lead Capture Pipeline
+
+The "Get listed free" CTAs on `/providers` all open `src/components/sales/InquiryModal.tsx`
+(a plain HTML form, no third-party embed). Flow:
+
+```
+InquiryModal  →  src/lib/leads.ts  →  Supabase public.leads  →  Database Webhook
+                        │                                              │
+                        └─ on any insert error: mailto: fallback       └─ POST /api/lead-notify
+                           to hello@medsociety.one                        → Resend email
+```
+
+- Schema + RLS: `supabase/migrations/0001_leads.sql`. Anon may INSERT only — there is no
+  select policy, so the public key cannot read the pipeline back.
+- Read the pipeline locally: `npx tsx --env-file=.env.local scripts/list-leads.ts [status]`
+  (needs `SUPABASE_SERVICE_ROLE_KEY`; the anon key is deliberately blind here).
+- Notification: `api/lead-notify.ts` — its header comment carries the full Vercel + Supabase
+  webhook setup. Authenticated by an `x-webhook-secret` header, not a signature.
+- **Gotcha:** `submitInquiry()` falls back to `mailto:` on *any* insert failure and only
+  `console.warn`s. A broken table or policy therefore looks like a working site while
+  quietly costing leads — after touching RLS, submit a test lead and confirm a row appears
+  rather than a mail client opening.
+
+## 10. Known Issues & TODOs
 
 - `src/utils/analytics.ts` contains an explicit `// TODO: swap with Supabase increment when live` — click tracking is a stub only, not persisted.
 - Uncommitted in-progress change: `email?: string` was just added to the `Provider` type but `useProviders.ts`'s `normalizeProvider()` has not been updated with a lowercase-fallback mapping for it (unlike `googlePlaceId`/`reviewCount`/`imageUrl`) — worth checking whether that's needed before/after the `seed-providers.ts` change lands.
 - `README.md` is still the unmodified default Vite/React template README — it documents template boilerplate (ESLint config expansion advice), not this project.
 - No automated tests exist for any part of the app.
 
-## 10. Fast Orientation for a New Agent
+## 11. Fast Orientation for a New Agent
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
