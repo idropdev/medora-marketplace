@@ -1,12 +1,34 @@
-  <!doctype html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/logo.png" />
-    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="icon" type="image/svg+xml" href="/medsociety-mark.svg" />
+    <link rel="apple-touch-icon" href="/medsociety-mark.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MedSociety</title>
-    
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="description" content="MedSociety is the verified healthcare directory for the El Paso and Ciudad Juarez border. Find dentists, specialists and clinics on both sides, in English and Spanish." />
+    <title>MedSociety — Find care on both sides of the border</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!--
+      Resolve the theme before first paint. Light is the default; a stored
+      preference wins. Doing this here rather than in a React effect avoids a
+      light-to-dark flash for dark-mode users, and means every element resolves
+      its custom properties against the correct palette on its first render.
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          document.documentElement.setAttribute('data-theme', stored === 'dark' ? 'dark' : 'light');
+        } catch (e) {
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+
     <!-- Analytics Tracking -->
     <script src="https://t.contentsquare.net/uxa/6e7a07d5a30aa.js"></script>
     <script type="text/javascript">

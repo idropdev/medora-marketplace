@@ -1,66 +1,151 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap');
 
-/* ─── Design Tokens ─────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════
+   MedSociety — Design Tokens
+   Light is the DEFAULT theme (:root). Dark is opt-in.
+
+   Legacy alias note: `--navy` means "page background" and `--white`
+   means "primary text". They are inverted in dark mode. Components
+   written before the light-first refactor rely on this, so the
+   aliases are preserved deliberately.
+   ═══════════════════════════════════════════════════════════════ */
+
 :root {
-  --navy: #0B1F3A;
-  --navy-800: #0f2847;
-  --navy-700: #143256;
-  --navy-600: #1a3d68;
-  --gold: #C9A84C;
-  --gold-light: #e0c075;
-  --gold-dim: rgba(201, 168, 76, 0.15);
-  --white: #ffffff;
-  --gray-100: #f5f7fa;
-  --gray-200: #e8edf4;
-  --gray-400: #9ba8ba;
-  --gray-600: #5a6880;
-  --green: #22c55e;
-  --red: #ef4444;
-  --surface: rgba(255, 255, 255, 0.06);
-  --surface-hover: rgba(255, 255, 255, 0.10);
-  --border: rgba(255, 255, 255, 0.10);
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  /* ── Surfaces (light) ── */
+  --navy: #ffffff;          /* page background        */
+  --navy-800: #ffffff;      /* elevated panel         */
+  --navy-700: #dbe2ed;      /* divider / scrollbar    */
+  --navy-600: #c2ccdb;
+
+  /* ── Text (light) — sharp, high-contrast ── */
+  --white: #080f1c;         /* primary text  (17.6:1) */
+  --gray-100: #101a2c;
+  --gray-200: #1d2a41;
+  --gray-300: #2c3a52;
+  --gray-400: #4a5a75;      /* muted text     (7.4:1) */
+  --gray-500: #5d6d88;
+  --gray-600: #74839c;
+  --gray-700: #c6cedb;      /* empty-state strokes    */
+
+  /* ── Brand ── */
+  --brand: #0b1f3a;
+  --on-brand: #ffffff;      /* text that sits on --brand      */
+  --gold: #8a6410;          /* AA on white — text/icon gold  */
+  --gold-light: #b4881d;
+  --gold-fill: #c9a84c;     /* decorative fill only          */
+  --gold-dim: rgba(138, 100, 16, 0.10);
+
+  /* ── Country accents — sharpened for light ── */
+  --us: #1544c9;
+  --us-soft: rgba(21, 68, 201, 0.09);
+  --mx: #12703c;
+  --mx-soft: rgba(18, 112, 60, 0.09);
+
+  --green: #12703c;
+  --red: #c22525;
+
+  /* ── Fills & lines ── */
+  --surface: #f4f7fb;
+  --surface-hover: #e9eef6;
+  --border: #d3dbe8;        /* real, visible 1px line */
+  --border-strong: #aab7ca;
+
+  /* ── Elevation — flat and clean, no glow ── */
+  --shadow: 0 10px 30px rgba(8, 15, 28, 0.10);
+  --shadow-sm: 0 1px 3px rgba(8, 15, 28, 0.08);
+
   --radius: 14px;
-  --radius-sm: 8px;
+  --radius-sm: 9px;
   --radius-pill: 100px;
-  --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --nav-bg: rgba(11, 31, 58, 0.85);
-  --nav-border: rgba(255, 255, 255, 0.08);
+  --ease-out: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Explicit property list on purpose. `transition: all` re-animates on every
+     custom-property change (including a theme flip) and can strand elements
+     on stale colors. */
+  --transition:
+    background-color 0.18s cubic-bezier(0.32, 0.72, 0, 1),
+    border-color 0.18s cubic-bezier(0.32, 0.72, 0, 1),
+    color 0.18s cubic-bezier(0.32, 0.72, 0, 1),
+    box-shadow 0.18s cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 0.18s cubic-bezier(0.32, 0.72, 0, 1);
+
+  --nav-bg: rgba(255, 255, 255, 0.92);
+  --nav-border: #dfe5ef;
+
+  --font-ui: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
 }
 
-[data-theme='light'] {
-  --navy: #f8fafc;
-  --navy-800: #f1f5f9;
-  --navy-700: #e2e8f0;
-  --navy-600: #cbd5e1;
-  --white: #0f172a;
-  --gray-100: #1e293b;
-  --gray-200: #334155;
-  --gray-400: #64748b;
-  --gray-600: #94a3b8;
-  --surface: rgba(0, 0, 0, 0.04);
-  --surface-hover: rgba(0, 0, 0, 0.08);
-  --border: rgba(0, 0, 0, 0.12);
-  --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
-  --nav-bg: rgba(248, 250, 252, 0.85);
-  --nav-border: rgba(0, 0, 0, 0.08);
+[data-theme='dark'] {
+  --navy: #0b1f3a;
+  --navy-800: #0f2847;
+  --navy-700: #1b3355;
+  --navy-600: #24406a;
+
+  --white: #f2f6fd;
+  --gray-100: #e2e9f5;
+  --gray-200: #cdd8e9;
+  --gray-300: #b3c1d8;
+  --gray-400: #93a3bd;
+  --gray-500: #8493ad;
+  --gray-600: #74839c;
+  --gray-700: #2b3f5f;
+
+  /* On navy, the gold carries the emphasis the deep navy can no longer give. */
+  --brand: #dcb75f;
+  --on-brand: #0b1f3a;
+  --gold: #dcb75f;
+  --gold-light: #ecd08a;
+  --gold-fill: #c9a84c;
+  --gold-dim: rgba(220, 183, 95, 0.14);
+
+  --us: #7fb0ff;
+  --us-soft: rgba(127, 176, 255, 0.14);
+  --mx: #5fd88f;
+  --mx-soft: rgba(95, 216, 143, 0.14);
+
+  --green: #5fd88f;
+  --red: #ff6b6b;
+
+  --surface: #12294a;
+  --surface-hover: #183256;
+  --border: #233d63;
+  --border-strong: #33527f;
+
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35);
+
+  --nav-bg: rgba(11, 31, 58, 0.92);
+  --nav-border: #1e3557;
 }
 
 /* ─── Reset ─────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+html {
+  /* Global type bump — every rem-based size in the app scales with this. */
+  font-size: 112.5%; /* 18px */
+}
+
+/* Note: never set `font-size` on `html` here — `1rem` resolves against the
+   root's own initial size and would silently undo the bump above. */
 html, body, #root {
   height: 100%;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-ui);
+  line-height: 1.55;
   background: var(--navy);
   color: var(--white);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+@media (max-width: 768px) {
+  html { font-size: 106.25%; } /* 17px */
 }
 
 a { color: inherit; text-decoration: none; }
-button { cursor: pointer; font-family: inherit; border: none; }
+button { cursor: pointer; font-family: inherit; border: none; font-size: inherit; }
+input, select, textarea { font-family: inherit; font-size: inherit; }
 img { max-width: 100%; display: block; }
 
 select option {
@@ -68,17 +153,39 @@ select option {
   color: var(--white);
 }
 
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
 /* ─── Typography ─────────────────────────────────────── */
-.text-xs   { font-size: 0.75rem; line-height: 1.4; }
-.text-sm   { font-size: 0.875rem; line-height: 1.5; }
-.text-base { font-size: 1rem; line-height: 1.6; }
-.text-lg   { font-size: 1.125rem; line-height: 1.5; }
-.text-xl   { font-size: 1.25rem; line-height: 1.4; }
-.text-2xl  { font-size: 1.5rem; line-height: 1.35; }
-.text-3xl  { font-size: 1.875rem; line-height: 1.25; }
-.text-4xl  { font-size: 2.25rem; line-height: 1.2; }
-.text-5xl  { font-size: 3rem; line-height: 1.1; }
-.text-6xl  { font-size: 3.75rem; line-height: 1.05; }
+.display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.02;
+}
+
+.eyebrow {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.text-xs   { font-size: 0.8rem;   line-height: 1.45; }
+.text-sm   { font-size: 0.9rem;   line-height: 1.5; }
+.text-base { font-size: 1rem;     line-height: 1.6; }
+.text-lg   { font-size: 1.15rem;  line-height: 1.55; }
+.text-xl   { font-size: 1.35rem;  line-height: 1.4; }
+.text-2xl  { font-size: 1.65rem;  line-height: 1.3; }
+.text-3xl  { font-size: 2.05rem;  line-height: 1.2; }
+.text-4xl  { font-size: 2.6rem;   line-height: 1.12; }
+.text-5xl  { font-size: 3.4rem;   line-height: 1.06; }
+.text-6xl  { font-size: 4.2rem;   line-height: 1.02; }
 
 .font-light    { font-weight: 300; }
 .font-normal   { font-weight: 400; }
@@ -87,11 +194,11 @@ select option {
 .font-bold     { font-weight: 700; }
 .font-extrabold{ font-weight: 800; }
 
-.text-gold     { color: var(--gold); }
-.text-muted    { color: var(--gray-400); }
-.text-white    { color: var(--white); }
-.text-navy     { color: var(--navy); }
-.text-green    { color: var(--green); }
+.text-gold  { color: var(--gold); }
+.text-muted { color: var(--gray-400); }
+.text-white { color: var(--white); }
+.text-navy  { color: var(--navy); }
+.text-green { color: var(--green); }
 
 /* ─── Layout Utilities ───────────────────────────────── */
 .flex        { display: flex; }
@@ -151,26 +258,47 @@ select option {
 .mt-auto { margin-top: auto; }
 .mx-auto { margin-left: auto; margin-right: auto; }
 
-/* ─── Glass Card ─────────────────────────────────────── */
+/* ─── Panels ─────────────────────────────────────────── */
+.panel {
+  background: var(--navy-800);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* Double-bezel: outer shell wrapping a concentric inner core. */
+.bezel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) + 6px);
+  padding: 6px;
+}
+.bezel > .bezel-core {
+  background: var(--navy-800);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  height: 100%;
+}
+
 .glass {
   background: var(--surface);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border);
   border-radius: var(--radius);
 }
 
 .glass-hover:hover {
   background: var(--surface-hover);
-  border-color: rgba(201, 168, 76, 0.3);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow);
+  border-color: var(--border-strong);
 }
 
 /* ─── Scrollbar ──────────────────────────────────────── */
-::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--navy-700); border-radius: 99px; }
+::-webkit-scrollbar-thumb {
+  background: var(--navy-700);
+  border-radius: 99px;
+  border: 3px solid var(--navy);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--navy-600); }
 
 /* ─── Responsive Container ───────────────────────────── */
 .container {
@@ -180,7 +308,9 @@ select option {
   padding: 0 1.5rem;
 }
 
-/* ─── Animations ─────────────────────────────────────── */
+/* ═══ Motion ═══════════════════════════════════════════
+   Only transform + opacity are animated. No glow pulses.
+   ═════════════════════════════════════════════════════ */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -189,16 +319,61 @@ select option {
   from { opacity: 0; transform: translateX(24px); }
   to   { opacity: 1; transform: translateX(0); }
 }
-@keyframes pulse-gold {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.4); }
-  50%       { box-shadow: 0 0 0 8px rgba(201,168,76,0); }
+@keyframes shimmer {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
 }
-.animate-fade-in     { animation: fadeIn 0.3s ease both; }
-.animate-slide-right { animation: slideInRight 0.3s ease both; }
+/* Idle: a slow, barely-there drift. Ambient, never distracting. */
+@keyframes idleFloat {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-6px); }
+}
+/* Idle: a soft breath on the brand mark. */
+@keyframes idleBreathe {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.045); }
+}
+/* Action: a crisp expanding ring, used on select. */
+@keyframes ringOut {
+  from { transform: scale(0.6); opacity: 0.55; }
+  to   { transform: scale(1.9); opacity: 0; }
+}
 
-@keyframes pulse {
-  0%, 100% { opacity: 0.4; }
-  50%      { opacity: 0.15; }
+.animate-fade-in     { animation: fadeIn 0.32s var(--ease-out) both; }
+.animate-slide-right { animation: slideInRight 0.28s var(--ease-out) both; }
+.idle-float   { animation: idleFloat 6s ease-in-out infinite; }
+.idle-breathe { animation: idleBreathe 4.5s ease-in-out infinite; }
+
+/* Color transitions for controls that don't need press feedback.
+   Use this class rather than an inline `transition: var(--transition)` —
+   an inline shorthand carrying a var() leaves elements resolving their other
+   var() references against the previous theme after a theme flip. */
+.tint { transition: var(--transition); }
+
+/* Action: press feedback on any interactive control. */
+.press {
+  transition: transform 0.12s var(--ease-out), background var(--transition),
+              border-color var(--transition), color var(--transition);
+}
+.press:hover  { transform: translateY(-1px); }
+.press:active { transform: translateY(0) scale(0.975); }
+
+/* Action: CTA arrow slides on hover. */
+.cta-arrow { transition: transform 0.24s var(--ease-out); }
+.press:hover .cta-arrow { transform: translateX(3px); }
+
+/* Loading skeleton — a light sweep, not a glowing pulse. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--surface-hover), transparent);
+  animation: shimmer 1.4s infinite;
 }
 
 /* Review carousel: hide scrollbar but keep scrolling */
@@ -209,13 +384,36 @@ select option {
 .mobile-only { display: none !important; }
 
 .map-sidebar {
-  width: 340px;
+  width: 440px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--nav-border);
   background: var(--navy);
   overflow-y: auto;
+}
+
+@media (max-width: 1200px) {
+  .map-sidebar { width: 380px; }
+}
+
+/* The nav carries a wordmark, two links and two controls. Below ~620px that
+   no longer fits, and because the bar is fixed it would push the language and
+   theme buttons off-screen rather than wrap. Shed the wordmark first, then
+   tighten the links. */
+@media (max-width: 620px) {
+  .ms-nav { padding: 0 0.85rem !important; }
+  .ms-wordmark { display: none !important; }
+  .ms-nav-controls { gap: 0.4rem !important; }
+  .ms-nav-links { gap: 0.2rem !important; }
+  .ms-nav-link {
+    padding: 0.4rem 0.6rem !important;
+    font-size: 0.8rem !important;
+  }
+}
+
+@media (max-width: 400px) {
+  .ms-nav-link { padding: 0.35rem 0.45rem !important; font-size: 0.74rem !important; }
 }
 
 @media (max-width: 768px) {
@@ -230,10 +428,34 @@ select option {
 
 /* ─── Elevating Cards ────────────────────────────────── */
 .hover-lift {
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.28s var(--ease-out), box-shadow 0.28s var(--ease-out),
+              border-color 0.28s var(--ease-out);
 }
 .hover-lift:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+  border-color: var(--border-strong);
   z-index: 10;
+}
+
+/* ─── Google Maps chrome — match the app surface ─────── */
+.gm-style .gm-style-iw-c {
+  padding: 0 !important;
+  border-radius: 12px !important;
+  box-shadow: var(--shadow) !important;
+  background: var(--navy-800) !important;
+  border: 1px solid var(--border);
+}
+.gm-style .gm-style-iw-d { overflow: hidden !important; padding: 0 !important; }
+.gm-style .gm-style-iw-tc::after { background: var(--navy-800) !important; }
+.gm-style-iw button.gm-ui-hover-effect { display: none !important; }
+
+/* ─── Reduced motion ─────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

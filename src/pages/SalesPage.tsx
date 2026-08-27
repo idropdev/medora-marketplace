@@ -1,236 +1,620 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, ChevronRight, Zap, CheckCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { mockProviders } from '../data/providers';
+import { useProviders } from '../hooks/useProviders';
+import type { Provider } from '../types/provider';
+import { InquiryModal } from '../components/sales/InquiryModal';
+import { LogoMark } from '../components/brand/Logo';
+import {
+    IconArrowRight, IconMapPin, IconClinic, IconViews, IconStar, IconBorder,
+    IconClipboard, IconMapPlane, IconChart, IconCheck, IconPromoted,
+    IconUS, IconMX, IconShield, IconLanguage,
+} from '../components/icons/Icons';
 
-const totalProviders = mockProviders.length;
-const avgRating = (mockProviders.reduce((s, p) => s + p.rating, 0) / totalProviders).toFixed(1);
-const totalClicks = mockProviders.reduce((s, p) => s + p.clicks, 0);
+interface Stats { providers: number; avgRating: string; clicks: number; specialties: number }
+
+function computeStats(list: Provider[]): Stats {
+    if (list.length === 0) return { providers: 0, avgRating: '0.0', clicks: 0, specialties: 0 };
+    const specialties = new Set(list.flatMap((p) => p.specialty ?? []));
+    return {
+        providers: list.length,
+        avgRating: (list.reduce((s, p) => s + (p.rating || 0), 0) / list.length).toFixed(1),
+        clicks: list.reduce((s, p) => s + (p.clicks || 0), 0),
+        specialties: specialties.size,
+    };
+}
 
 export function SalesPage() {
     const { t } = useTranslation();
-    const [mousePos, setMousePos] = useState({ x: 50, y: 0 });
+    const [modalPlan, setModalPlan] = useState<string | null>(null);
 
-    const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width) * 100;
-        const y = ((e.clientY - rect.top) / rect.height) * 100;
-        setMousePos({ x, y });
-    };
+    // Quote the real directory, not the 16-row mock fixture. The mock is only
+    // a placeholder while the fetch is in flight or Supabase is unreachable.
+    const { allProviders } = useProviders();
+    const stats = computeStats(allProviders.length > 0 ? allProviders : mockProviders);
+
+    const openForm = (plan: string) => setModalPlan(plan);
+    const closeForm = () => setModalPlan(null);
 
     return (
-        <div style={{ paddingTop: 60 }}>
-            {/* ── Hero ── */}
+        <div style={{ paddingTop: 68 }}>
+            {/* ══ Hero ══════════════════════════════════════════════
+                Asymmetric editorial split. The previous version tracked the
+                cursor with a radial gold glow; it is replaced by a static
+                color block and a fine rule grid that hold their shape in
+                both themes and cost nothing to paint.
+                ═══════════════════════════════════════════════════════ */}
             <section
-                onMouseMove={handleMouseMove}
                 style={{
-                    minHeight: '85vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    padding: '4rem 1.5rem',
-                    position: 'relative', overflow: 'hidden',
-                    background: `radial-gradient(circle 800px at ${mousePos.x}% ${mousePos.y}%, rgba(201,168,76,0.15) 0%, rgba(201,168,76,0.05) 40%, transparent 80%)`,
+                    position: 'relative',
+                    overflow: 'hidden',
+                    borderBottom: '1px solid var(--border)',
+                    background: 'var(--navy)',
                 }}
             >
-                {/* Background grid */}
-                <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.04, pointerEvents: 'none' }} viewBox="0 0 800 600" preserveAspectRatio="xMidYMid slice">
-                    <defs><pattern id="sg" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#C9A84C" strokeWidth="0.5" /></pattern></defs>
-                    <rect width="100%" height="100%" fill="url(#sg)" />
+                {/* Flat diagonal color block */}
+                <div
+                    aria-hidden
+                    style={{
+                        position: 'absolute', top: 0, right: 0,
+                        width: '46%', height: '100%',
+                        background: 'var(--surface)',
+                        borderLeft: '1px solid var(--border)',
+                        transform: 'skewX(-9deg)',
+                        transformOrigin: 'top right',
+                        pointerEvents: 'none',
+                    }}
+                />
+                {/* Fine rule grid */}
+                <svg
+                    aria-hidden
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.55, pointerEvents: 'none' }}
+                >
+                    <defs>
+                        <pattern id="salesGrid" width="56" height="56" patternUnits="userSpaceOnUse">
+                            <path d="M 56 0 L 0 0 0 56" fill="none" stroke="var(--border)" strokeWidth="1" />
+                        </pattern>
+                    </defs>
+                    <rect width="100%" height="100%" fill="url(#salesGrid)" />
                 </svg>
 
-                <div style={{ textAlign: 'center', maxWidth: 720, position: 'relative', zIndex: 1 }}>
-                    <h1 style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 800, lineHeight: 1.1, marginBottom: '1rem', letterSpacing: '-0.03em' }}>
-                        {t('sales.heroTitle')}<br />
-                        <span style={{ background: 'linear-gradient(135deg, #C9A84C, #e0c075)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>{t('sales.heroTitleHighlight')}</span>
-                    </h1>
-                    <p style={{ fontSize: '1.15rem', color: 'var(--gray-400)', marginBottom: '2.5rem', lineHeight: 1.7, maxWidth: 560, margin: '0 auto 2.5rem' }}>
-                        {t('sales.heroSubtitle')}
-                    </p>
+                <div
+                    style={{
+                        position: 'relative', zIndex: 1,
+                        maxWidth: 1180, margin: '0 auto',
+                        padding: '6rem 1.5rem 5.5rem',
+                        display: 'grid',
+                        gridTemplateColumns: 'minmax(0, 1.05fr) minmax(0, 0.95fr)',
+                        gap: '3.5rem',
+                        alignItems: 'center',
+                    }}
+                    className="sales-hero-grid"
+                >
+                    <div>
+                        <span className="eyebrow">{t('sales.heroEyebrow')}</span>
 
-                    <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <a href="mailto:hello@medsociety.one" style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                            padding: '0.875rem 1.75rem', borderRadius: 'var(--radius-pill)',
-                            background: 'linear-gradient(135deg, #C9A84C, #e0c075)',
-                            color: 'var(--navy)', fontWeight: 700, fontSize: '0.95rem',
-                        }}>
-                            {t('sales.heroCtaPrimary')} <ChevronRight size={18} />
-                        </a>
-                        <Link to="/" style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                            padding: '0.875rem 1.75rem', borderRadius: 'var(--radius-pill)',
-                            background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)',
-                            color: 'var(--white)', fontWeight: 600, fontSize: '0.95rem',
-                        }}>
-                            <MapPin size={16} /> {t('sales.heroCtaSecondary')}
-                        </Link>
+                        <h1
+                            className="display"
+                            style={{ fontSize: 'clamp(2.9rem, 6.2vw, 4.6rem)', margin: '1rem 0 1.35rem' }}
+                        >
+                            {t('sales.heroTitle')}{' '}
+                            <em style={{ color: 'var(--gold)', fontStyle: 'italic' }}>
+                                {t('sales.heroTitleHighlight')}
+                            </em>
+                        </h1>
+
+                        <p
+                            style={{
+                                fontSize: '1.15rem',
+                                color: 'var(--gray-300)',
+                                lineHeight: 1.65,
+                                maxWidth: 520,
+                                marginBottom: '2.25rem',
+                            }}
+                        >
+                            {t('sales.heroSubtitle')}
+                        </p>
+
+                        <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                            <PrimaryCta onClick={() => openForm('hero')}>
+                                {t('sales.heroCtaPrimary')}
+                            </PrimaryCta>
+                            <Link
+                                to="/"
+                                className="press"
+                                style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+                                    padding: '0.95rem 1.75rem', borderRadius: 'var(--radius-pill)',
+                                    background: 'var(--navy-800)', border: '1px solid var(--border-strong)',
+                                    color: 'var(--white)', fontWeight: 700, fontSize: '0.98rem',
+                                }}
+                            >
+                                <IconMapPin size={18} /> {t('sales.heroCtaSecondary')}
+                            </Link>
+                        </div>
+
+                        <div
+                            style={{
+                                display: 'flex', flexWrap: 'wrap', gap: '1.35rem',
+                                marginTop: '2.5rem', paddingTop: '1.6rem',
+                                borderTop: '1px solid var(--border)',
+                            }}
+                        >
+                            <TrustPoint icon={<IconShield size={17} />} label={t('sales.trustVerified')} />
+                            <TrustPoint icon={<IconLanguage size={17} />} label={t('sales.trustBilingual')} />
+                            <TrustPoint icon={<IconBorder size={17} />} label={t('sales.trustBorder')} />
+                        </div>
                     </div>
+
+                    <BorderMapArt />
                 </div>
             </section>
 
-            {/* ── Stats ── */}
-            <section style={{ background: 'rgba(255,255,255,0.03)', borderTop: '1px solid rgba(255,255,255,0.07)', borderBottom: '1px solid rgba(255,255,255,0.07)', padding: '3rem 1.5rem' }}>
-                <Reveal delay={0.1}>
-                    <div style={{ maxWidth: 900, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '2rem', textAlign: 'center' }}>
-                        <StatTile icon="🏥" value={`${totalProviders}+`} label={t('sales.statsProviders')} />
-                        <StatTile icon="👁" value={totalClicks.toLocaleString()} label={t('sales.statsViews')} />
-                        <StatTile icon="⭐" value={avgRating} label={t('sales.statsRating')} />
-                        <StatTile icon="🌎" value="2" label={t('sales.statsCities')} />
+            {/* ══ Stats ══════════════════════════════════════════════ */}
+            <section style={{ borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
+                <Reveal>
+                    <div
+                        style={{
+                            maxWidth: 1180, margin: '0 auto',
+                            padding: '3.5rem 1.5rem',
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))',
+                            gap: '1.25rem',
+                        }}
+                    >
+                        <StatTile icon={<IconClinic size={24} />} value={`${stats.providers}+`} label={t('sales.statsProviders')} accent="var(--us)" />
+                        {/*
+                          Profile views only appear once click tracking actually
+                          records something. Until then we show a figure we can
+                          stand behind rather than advertising a zero.
+                        */}
+                        {stats.clicks > 0 ? (
+                            <StatTile icon={<IconViews size={24} />} value={stats.clicks.toLocaleString()} label={t('sales.statsViews')} accent="var(--gold)" />
+                        ) : (
+                            <StatTile icon={<IconClipboard size={24} />} value={String(stats.specialties)} label={t('sales.statsSpecialties')} accent="var(--gold)" />
+                        )}
+                        <StatTile icon={<IconStar size={24} />} value={stats.avgRating} label={t('sales.statsRating')} accent="var(--gold)" />
+                        <StatTile icon={<IconBorder size={24} />} value="2" label={t('sales.statsCities')} accent="var(--mx)" />
                     </div>
                 </Reveal>
             </section>
 
-            {/* ── How It Works ── */}
-            <section style={{ padding: '5rem 1.5rem' }}>
-                <Reveal delay={0.1}>
-                    <div style={{ maxWidth: 900, margin: '0 auto' }}>
-                        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-                            <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>{t('sales.howTitle')}</h2>
-                            <p style={{ color: 'var(--gray-400)', maxWidth: 480, margin: '0 auto' }}>{t('sales.howSubtitle')}</p>
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '1.5rem' }}>
-                            <StepCard step="1" icon="📋" title={t('sales.step1Title')} body={t('sales.step1Body')} />
-                            <StepCard step="2" icon="🗺️" title={t('sales.step2Title')} body={t('sales.step2Body')} />
-                            <StepCard step="3" icon="📈" title={t('sales.step3Title')} body={t('sales.step3Body')} />
+            {/* ══ How it works ═══════════════════════════════════════ */}
+            <section style={{ padding: '6.5rem 1.5rem' }}>
+                <Reveal>
+                    <div style={{ maxWidth: 1080, margin: '0 auto' }}>
+                        <SectionHead eyebrow={t('sales.howEyebrow')} title={t('sales.howTitle')} body={t('sales.howSubtitle')} />
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))',
+                                gap: '1.35rem',
+                            }}
+                        >
+                            <StepCard step="01" icon={<IconClipboard size={26} />} title={t('sales.step1Title')} body={t('sales.step1Body')} />
+                            <StepCard step="02" icon={<IconMapPlane size={26} />} title={t('sales.step2Title')} body={t('sales.step2Body')} />
+                            <StepCard step="03" icon={<IconChart size={26} />} title={t('sales.step3Title')} body={t('sales.step3Body')} />
                         </div>
                     </div>
                 </Reveal>
             </section>
 
-            {/* ── Pricing ── */}
-            <section style={{ padding: '5rem 1.5rem', background: 'rgba(255,255,255,0.02)' }}>
-                <Reveal delay={0.1}>
-                    <div style={{ maxWidth: 800, margin: '0 auto' }}>
-                        <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
-                            <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>{t('sales.pricingTitle')}</h2>
-                            <p style={{ color: 'var(--gray-400)' }}>{t('sales.pricingSubtitle')}</p>
-                        </div>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.5rem', marginBottom: '3rem' }}>
+            {/* ══ Coverage ═══════════════════════════════════════════ */}
+            <section style={{ borderTop: '1px solid var(--border)', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
+                <Reveal>
+                    <div
+                        style={{
+                            maxWidth: 1080, margin: '0 auto', padding: '5rem 1.5rem',
+                            display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '1.35rem',
+                        }}
+                    >
+                        <CityCard
+                            icon={<IconUS size={22} />}
+                            accent="var(--us)"
+                            city={t('sales.cityElPaso')}
+                            region={t('sales.cityElPasoRegion')}
+                            body={t('sales.cityElPasoBody')}
+                        />
+                        <CityCard
+                            icon={<IconMX size={22} />}
+                            accent="var(--mx)"
+                            city={t('sales.cityJuarez')}
+                            region={t('sales.cityJuarezRegion')}
+                            body={t('sales.cityJuarezBody')}
+                        />
+                    </div>
+                </Reveal>
+            </section>
+
+            {/* ══ Pricing ════════════════════════════════════════════ */}
+            <section id="pricing" style={{ padding: '6.5rem 1.5rem', scrollMarginTop: '90px' }}>
+                <Reveal>
+                    <div style={{ maxWidth: 880, margin: '0 auto' }}>
+                        <SectionHead eyebrow={t('sales.pricingEyebrow')} title={t('sales.pricingTitle')} body={t('sales.pricingSubtitle')} />
+
+                        <div
+                            style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+                                gap: '1.35rem',
+                            }}
+                        >
                             <PricingCard
                                 tier={t('sales.freeTier')}
                                 price="$0"
                                 period={t('sales.freePeriod')}
-                                color="rgba(255,255,255,0.06)"
-                                border="rgba(255,255,255,0.1)"
                                 features={[t('sales.freeF1'), t('sales.freeF2'), t('sales.freeF3'), t('sales.freeF4')]}
+                                ctaLabel={t('sales.freeCta')}
+                                onCta={() => openForm('free')}
                             />
                             <PricingCard
+                                featured
                                 tier={t('sales.proTier')}
                                 price="$49"
                                 period={t('sales.proPeriod')}
-                                color="rgba(201,168,76,0.08)"
-                                border="rgba(201,168,76,0.35)"
                                 badge={t('sales.proBadge')}
                                 features={[t('sales.proF1'), t('sales.proF2'), t('sales.proF3'), t('sales.proF4'), t('sales.proF5')]}
-                                priceColor="var(--gold)"
+                                ctaLabel={t('sales.proCta')}
+                                onCta={() => openForm('promoted')}
                             />
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'center' }}>
-                            <a href="https://pricing.medsociety.one/" className="hover-lift" style={{
-                                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                                padding: '1rem 2.25rem', borderRadius: 'var(--radius-pill)',
-                                background: 'linear-gradient(135deg, #C9A84C, #e0c075)',
-                                color: 'var(--navy)', fontWeight: 700, fontSize: '1rem',
-                                boxShadow: '0 4px 20px rgba(201, 168, 76, 0.25)'
-                            }}>
-                                {t('sales.pricingCta')} <ChevronRight size={18} />
+
+                        <p style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.9rem', color: 'var(--gray-400)' }}>
+                            {t('sales.pricingCompare')}{' '}
+                            <a
+                                href="https://pricing.medsociety.one/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ color: 'var(--gold)', fontWeight: 700, textDecoration: 'underline' }}
+                            >
+                                {t('sales.pricingCta')}
                             </a>
-                        </div>
+                        </p>
                     </div>
                 </Reveal>
             </section>
 
-            {/* ── Target Specialties ── */}
-            <section style={{ padding: '5rem 1.5rem' }}>
-                <Reveal delay={0.2}>
-                    <div style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}>
-                        <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.75rem' }}>{t('sales.whoTitle')}</h2>
-                        <p style={{ color: 'var(--gray-400)', marginBottom: '2.5rem', maxWidth: 500, margin: '0 auto 2.5rem' }}>{t('sales.whoSubtitle')}</p>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem', justifyContent: 'center' }}>
-                            {[['🦷', 'Dentistry'], ['😁', 'Orthodontics'], ['💉', 'Plastic Surgery'], ['✨', 'Aesthetics'], ['👶', 'OB/GYN'], ['🏃', 'Physical Therapy'], ['💆', 'Massage'], ['👁', 'Optometry'], ['❤️', 'Cardiology'], ['🏥', 'General Practice']].map(([emoji, label]) => (
-                                <div key={label} className="hover-lift" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 1.1rem', borderRadius: 'var(--radius-pill)', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', fontSize: '0.875rem', cursor: 'pointer' }}>
-                                    <span>{emoji}</span> {label}
-                                </div>
-                            ))}
-                        </div>
+            {/* ══ Closing CTA ════════════════════════════════════════ */}
+            <section
+                style={{
+                    padding: '5.5rem 1.5rem',
+                    background: 'var(--brand)',
+                    color: 'var(--on-brand)',
+                }}
+            >
+                <Reveal>
+                    <div style={{ maxWidth: 660, margin: '0 auto', textAlign: 'center' }}>
+                        <LogoMark size={46} idle />
+                        <h2
+                            className="display"
+                            style={{ fontSize: 'clamp(2rem, 4.4vw, 2.9rem)', margin: '1.35rem 0 0.9rem', color: 'inherit' }}
+                        >
+                            {t('sales.ctaBannerTitle')}
+                        </h2>
+                        <p style={{ opacity: 0.82, marginBottom: '2.25rem', fontSize: '1.05rem', lineHeight: 1.65 }}>
+                            {t('sales.ctaBannerSubtitle')}
+                        </p>
+                        <button
+                            onClick={() => openForm('closing')}
+                            className="press"
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '0.6rem',
+                                padding: '1rem 2.1rem', borderRadius: 'var(--radius-pill)',
+                                background: 'var(--navy-800)', color: 'var(--white)',
+                                fontWeight: 700, fontSize: '1rem',
+                                border: '1px solid var(--border)',
+                            }}
+                        >
+                            {t('sales.ctaBannerBtn')}
+                            <span className="cta-arrow" style={{ display: 'flex' }}><IconArrowRight size={18} weight={2} /></span>
+                        </button>
                     </div>
                 </Reveal>
             </section>
 
-            {/* ── CTA Banner ── */}
-            <section style={{ padding: '5rem 1.5rem', background: 'linear-gradient(135deg, rgba(201,168,76,0.15), rgba(201,168,76,0.05))' }}>
-                <Reveal delay={0.1}>
-                    <div style={{ maxWidth: 600, margin: '0 auto', textAlign: 'center' }}>
-                        <h2 style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '1rem' }}>{t('sales.ctaBannerTitle')}</h2>
-                        <p style={{ color: 'var(--gray-400)', marginBottom: '2rem' }}>{t('sales.ctaBannerSubtitle')}</p>
-                        <a href="mailto:hello@medsociety.one" className="hover-lift" style={{
-                            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-                            padding: '1rem 2rem', borderRadius: 'var(--radius-pill)',
-                            background: 'linear-gradient(135deg, #C9A84C, #e0c075)',
-                            color: 'var(--navy)', fontWeight: 700, fontSize: '1rem',
-                        }}>
-                            {t('sales.ctaBannerBtn')} <ChevronRight size={18} />
-                        </a>
-                    </div>
-                </Reveal>
-            </section>
-
-            {/* Footer */}
-            <footer style={{ borderTop: '1px solid rgba(255,255,255,0.07)', padding: '1.5rem', textAlign: 'center', color: 'var(--gray-400)', fontSize: '0.8rem' }}>
+            <footer
+                style={{
+                    borderTop: '1px solid var(--border)',
+                    padding: '2rem 1.5rem',
+                    textAlign: 'center',
+                    color: 'var(--gray-400)',
+                    fontSize: '0.85rem',
+                }}
+            >
                 {t('sales.footer', { year: new Date().getFullYear() })}
             </footer>
+
+            {modalPlan !== null && (
+                <InquiryModal key={modalPlan} onClose={closeForm} plan={modalPlan} />
+            )}
+
+            {/* Hero collapses to a single column on small screens. */}
+            <style>{`
+                @media (max-width: 900px) {
+                    .sales-hero-grid {
+                        grid-template-columns: 1fr !important;
+                        padding: 4rem 1rem 3.5rem !important;
+                        gap: 2.5rem !important;
+                    }
+                }
+            `}</style>
         </div>
     );
 }
 
-function StatTile({ icon, value, label }: { icon: string; value: string; label: string }) {
-    return (
-        <div className="hover-lift" style={{ padding: '1.5rem', borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
-            <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>{icon}</div>
-            <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--gold)' }}>{value}</div>
-            <div style={{ fontSize: '0.85rem', color: 'var(--gray-400)', marginTop: '0.25rem' }}>{label}</div>
-        </div>
-    );
-}
+/* ── Hero artwork ─────────────────────────────────────────────────────
+   A stylised plan-view of the two cities either side of the Rio Grande,
+   with clinic pins. Vector rather than photography so it stays crisp,
+   themes correctly, and adds no image weight.
+   ─────────────────────────────────────────────────────────────────── */
+function BorderMapArt() {
+    const pins = [
+        { x: 78, y: 96, side: 'us' }, { x: 132, y: 66, side: 'us' },
+        { x: 196, y: 108, side: 'us' }, { x: 246, y: 74, side: 'us' },
+        { x: 104, y: 218, side: 'mx' }, { x: 168, y: 254, side: 'mx' },
+        { x: 232, y: 206, side: 'mx' }, { x: 286, y: 250, side: 'mx' },
+    ];
 
-function StepCard({ step, icon, title, body }: { step: string; icon: string; title: string; body: string }) {
     return (
-        <div className="hover-lift" style={{ padding: '1.75rem', borderRadius: 'var(--radius)', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(201,168,76,0.15)', border: '1px solid rgba(201,168,76,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.75rem', fontWeight: 700, color: 'var(--gold)', flexShrink: 0 }}>{step}</div>
-                <span style={{ fontSize: '1.5rem' }}>{icon}</span>
+        <div className="bezel idle-float" style={{ boxShadow: 'var(--shadow)' }}>
+            <div className="bezel-core" style={{ overflow: 'hidden', padding: '1.1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.85rem' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--gray-400)' }}>
+                        El Paso · Ciudad Juárez
+                    </span>
+                    <span style={{ display: 'flex', gap: 4 }}>
+                        {['var(--us)', 'var(--gold)', 'var(--mx)'].map((c) => (
+                            <span key={c} style={{ width: 7, height: 7, borderRadius: '50%', background: c }} />
+                        ))}
+                    </span>
+                </div>
+
+                <svg viewBox="0 0 360 320" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 10 }} role="img" aria-label="Map of clinics across the El Paso and Ciudad Juarez border">
+                    <rect width="360" height="320" fill="var(--surface)" />
+
+                    {/* Street grid, north side */}
+                    <g stroke="var(--border)" strokeWidth="1.5" opacity="0.9">
+                        {[40, 80, 120, 160].map((y) => <line key={y} x1="0" y1={y} x2="360" y2={y} />)}
+                        {[60, 120, 180, 240, 300].map((x) => <line key={x} x1={x} y1="0" x2={x} y2="165" />)}
+                    </g>
+                    {/* Street grid, south side (rotated feel via offset) */}
+                    <g stroke="var(--border)" strokeWidth="1.5" opacity="0.9">
+                        {[210, 250, 290].map((y) => <line key={y} x1="0" y1={y} x2="360" y2={y} />)}
+                        {[45, 105, 165, 225, 285].map((x) => <line key={x} x1={x} y1="188" x2={x} y2="320" />)}
+                    </g>
+
+                    {/* The river / the border */}
+                    <path d="M0 182 C 70 168, 120 196, 185 176 S 300 168, 360 178" stroke="var(--us)" strokeWidth="7" fill="none" opacity="0.28" strokeLinecap="round" />
+                    <path d="M0 182 C 70 168, 120 196, 185 176 S 300 168, 360 178" stroke="var(--gold)" strokeWidth="2" fill="none" strokeDasharray="7 6" strokeLinecap="round" />
+
+                    {/* Clinic pins */}
+                    {pins.map((p, i) => (
+                        <g key={i}>
+                            <circle
+                                cx={p.x} cy={p.y} r="9"
+                                fill={p.side === 'us' ? 'var(--us)' : 'var(--mx)'}
+                                opacity="0.16"
+                            />
+                            <circle
+                                cx={p.x} cy={p.y} r="5"
+                                fill={p.side === 'us' ? 'var(--us)' : 'var(--mx)'}
+                                stroke="var(--navy-800)" strokeWidth="2"
+                            />
+                        </g>
+                    ))}
+
+                    {/* Promoted clinic — the product's paid outcome, made visible */}
+                    <g>
+                        <circle cx="168" cy="130" r="16" fill="var(--gold)" opacity="0.16" />
+                        <circle cx="168" cy="130" r="9" fill="var(--gold)" stroke="var(--navy-800)" strokeWidth="2.5" />
+                    </g>
+
+                    {/* City labels */}
+                    <text x="18" y="30" fill="var(--gray-400)" fontSize="12" fontWeight="700" letterSpacing="1.6" fontFamily="Plus Jakarta Sans, sans-serif">EL PASO, TX</text>
+                    <text x="18" y="312" fill="var(--gray-400)" fontSize="12" fontWeight="700" letterSpacing="1.6" fontFamily="Plus Jakarta Sans, sans-serif">CD. JUÁREZ, CHIH</text>
+                </svg>
             </div>
-            <h3 style={{ fontWeight: 700, fontSize: '1rem' }}>{title}</h3>
-            <p style={{ color: 'var(--gray-400)', fontSize: '0.875rem', lineHeight: 1.6 }}>{body}</p>
         </div>
     );
 }
 
-function PricingCard({ tier, price, period, color, border, badge, features, priceColor = 'var(--white)' }: {
-    tier: string; price: string; period: string; color: string; border: string;
-    badge?: string; features: string[]; priceColor?: string;
+/* ── Building blocks ──────────────────────────────────────────────── */
+
+function PrimaryCta({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+    return (
+        <button
+            onClick={onClick}
+            className="press"
+            style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.6rem',
+                padding: '0.95rem 1.35rem 0.95rem 1.85rem',
+                borderRadius: 'var(--radius-pill)',
+                background: 'var(--brand)', color: 'var(--on-brand)',
+                fontWeight: 700, fontSize: '0.98rem',
+            }}
+        >
+            {children}
+            {/* Button-in-button: the arrow rides in its own disc at the pill's edge. */}
+            <span
+                className="cta-arrow"
+                style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: 30, height: 30, borderRadius: '50%',
+                    background: 'rgba(255,255,255,0.16)',
+                }}
+            >
+                <IconArrowRight size={16} weight={2} />
+            </span>
+        </button>
+    );
+}
+
+function TrustPoint({ icon, label }: { icon: React.ReactNode; label: string }) {
+    return (
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.45rem', fontSize: '0.85rem', color: 'var(--gray-400)', fontWeight: 600 }}>
+            <span style={{ color: 'var(--gold)', display: 'flex' }}>{icon}</span>
+            {label}
+        </span>
+    );
+}
+
+function SectionHead({ eyebrow, title, body }: { eyebrow: string; title: string; body: string }) {
+    return (
+        <div style={{ marginBottom: '3.25rem', maxWidth: 620 }}>
+            <span className="eyebrow">{eyebrow}</span>
+            <h2 className="display" style={{ fontSize: 'clamp(2rem, 4.4vw, 3rem)', margin: '0.85rem 0 0.9rem' }}>
+                {title}
+            </h2>
+            <p style={{ color: 'var(--gray-400)', fontSize: '1.05rem', lineHeight: 1.65 }}>{body}</p>
+        </div>
+    );
+}
+
+function StatTile({ icon, value, label, accent }: {
+    icon: React.ReactNode; value: string; label: string; accent: string;
 }) {
     return (
-        <div className="hover-lift" style={{ padding: '2rem', borderRadius: 'var(--radius)', background: color, border: `1px solid ${border}`, display: 'flex', flexDirection: 'column', gap: '1.25rem', position: 'relative' }}>
+        <div
+            className="hover-lift"
+            style={{
+                padding: '1.6rem',
+                borderRadius: 'var(--radius)',
+                background: 'var(--navy-800)',
+                border: '1px solid var(--border)',
+                borderTop: `3px solid ${accent}`,
+            }}
+        >
+            <span style={{ color: accent, display: 'flex', marginBottom: '0.9rem' }}>{icon}</span>
+            <div style={{ fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1 }}>{value}</div>
+            <div style={{ fontSize: '0.88rem', color: 'var(--gray-400)', marginTop: '0.5rem' }}>{label}</div>
+        </div>
+    );
+}
+
+function StepCard({ step, icon, title, body }: {
+    step: string; icon: React.ReactNode; title: string; body: string;
+}) {
+    return (
+        <div className="bezel hover-lift">
+            <div className="bezel-core" style={{ padding: '1.75rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <span style={{ color: 'var(--gold)', display: 'flex' }}>{icon}</span>
+                    <span
+                        className="display"
+                        style={{ fontSize: '2rem', color: 'var(--gray-600)', lineHeight: 1 }}
+                    >
+                        {step}
+                    </span>
+                </div>
+                <h3 style={{ fontWeight: 800, fontSize: '1.15rem', letterSpacing: '-0.01em' }}>{title}</h3>
+                <p style={{ color: 'var(--gray-400)', fontSize: '0.92rem', lineHeight: 1.65 }}>{body}</p>
+            </div>
+        </div>
+    );
+}
+
+function CityCard({ icon, accent, city, region, body }: {
+    icon: React.ReactNode; accent: string; city: string; region: string; body: string;
+}) {
+    return (
+        <div
+            className="hover-lift"
+            style={{
+                background: 'var(--navy-800)',
+                border: '1px solid var(--border)',
+                borderLeft: `4px solid ${accent}`,
+                borderRadius: 'var(--radius)',
+                padding: '1.85rem',
+            }}
+        >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', marginBottom: '1rem' }}>
+                <span style={{ color: accent, display: 'flex' }}>{icon}</span>
+                <span style={{ fontSize: '0.72rem', fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase', color: accent }}>
+                    {region}
+                </span>
+            </div>
+            <h3 className="display" style={{ fontSize: '1.9rem', marginBottom: '0.65rem' }}>{city}</h3>
+            <p style={{ color: 'var(--gray-400)', fontSize: '0.95rem', lineHeight: 1.65 }}>{body}</p>
+        </div>
+    );
+}
+
+function PricingCard({ tier, price, period, badge, features, featured = false, ctaLabel, onCta }: {
+    tier: string; price: string; period: string; badge?: string;
+    features: string[]; featured?: boolean; ctaLabel: string; onCta: () => void;
+}) {
+    return (
+        <div
+            style={{
+                position: 'relative',
+                padding: '2.1rem',
+                borderRadius: 'calc(var(--radius) + 4px)',
+                background: featured ? 'var(--brand)' : 'var(--navy-800)',
+                color: featured ? 'var(--on-brand)' : 'var(--white)',
+                border: `1px solid ${featured ? 'var(--brand)' : 'var(--border)'}`,
+                display: 'flex', flexDirection: 'column', gap: '1.5rem',
+                boxShadow: featured ? 'var(--shadow)' : 'none',
+            }}
+        >
             {badge && (
-                <div style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', padding: '0.25rem 0.875rem', borderRadius: 'var(--radius-pill)', background: 'linear-gradient(135deg,#C9A84C,#e0c075)', color: 'var(--navy)', fontSize: '0.7rem', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                    <Zap size={10} style={{ display: 'inline', marginRight: 4 }} />{badge}
+                <div
+                    style={{
+                        position: 'absolute', top: '-13px', left: '2.1rem',
+                        display: 'inline-flex', alignItems: 'center', gap: '0.3rem',
+                        padding: '0.28rem 0.85rem', borderRadius: 'var(--radius-pill)',
+                        background: 'var(--gold-fill)', color: '#0b1f3a',
+                        fontSize: '0.7rem', fontWeight: 800, letterSpacing: '0.07em',
+                        whiteSpace: 'nowrap',
+                    }}
+                >
+                    <IconPromoted size={11} weight={2.2} /> {badge}
                 </div>
             )}
+
             <div>
-                <p style={{ fontSize: '0.8rem', color: 'var(--gray-400)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>{tier}</p>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.35rem' }}>
-                    <span style={{ fontSize: '2.5rem', fontWeight: 800, color: priceColor }}>{price}</span>
-                    <span style={{ color: 'var(--gray-400)', fontSize: '0.875rem' }}>{period}</span>
+                <p
+                    style={{
+                        fontSize: '0.72rem', fontWeight: 800, textTransform: 'uppercase',
+                        letterSpacing: '0.14em', marginBottom: '0.7rem',
+                        opacity: featured ? 0.8 : 1,
+                        color: featured ? 'inherit' : 'var(--gray-400)',
+                    }}
+                >
+                    {tier}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
+                    <span className="display" style={{ fontSize: '3.2rem' }}>{price}</span>
+                    <span style={{ fontSize: '0.92rem', opacity: 0.75 }}>{period}</span>
                 </div>
             </div>
-            <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem', listStyle: 'none', flex: 1 }}>
+
+            <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', listStyle: 'none', flex: 1 }}>
                 {features.map((f) => (
-                    <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem', fontSize: '0.875rem', color: 'var(--gray-400)' }}>
-                        <CheckCircle size={15} style={{ color: 'var(--gold)', flexShrink: 0, marginTop: 1 }} />
-                        {f}
+                    <li key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', fontSize: '0.92rem', lineHeight: 1.5 }}>
+                        <span style={{ color: featured ? 'var(--gold-fill)' : 'var(--gold)', flexShrink: 0, marginTop: 2, display: 'flex' }}>
+                            <IconCheck size={16} weight={2.2} />
+                        </span>
+                        <span style={{ opacity: featured ? 0.92 : 1, color: featured ? 'inherit' : 'var(--gray-300)' }}>{f}</span>
                     </li>
                 ))}
             </ul>
+
+            <button
+                onClick={onCta}
+                className="press"
+                style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                    padding: '0.9rem 1.5rem', borderRadius: 'var(--radius-pill)',
+                    background: featured ? 'var(--navy-800)' : 'var(--brand)',
+                    color: featured ? 'var(--white)' : 'var(--on-brand)',
+                    border: featured ? '1px solid var(--border)' : 'none',
+                    fontWeight: 700, fontSize: '0.95rem',
+                }}
+            >
+                {ctaLabel}
+                <span className="cta-arrow" style={{ display: 'flex' }}><IconArrowRight size={16} weight={2} /></span>
+            </button>
         </div>
     );
 }
@@ -241,23 +625,28 @@ function Reveal({ children, delay = 0 }: { children: React.ReactNode; delay?: nu
 
     useEffect(() => {
         if (!ref.current) return;
-        const observer = new IntersectionObserver(([entry]) => {
-            if (entry.isIntersecting) {
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (!entry.isIntersecting) return;
                 setIsVisible(true);
                 observer.unobserve(entry.target);
-            }
-        }, { threshold: 0.1, rootMargin: '50px' });
+            },
+            { threshold: 0.08, rootMargin: '60px' },
+        );
         observer.observe(ref.current);
         return () => observer.disconnect();
     }, []);
 
     return (
-        <div ref={ref} style={{
-            opacity: isVisible ? 1 : 0,
-            transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
-            transition: `opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) ${delay}s, transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) ${delay}s`,
-            willChange: 'opacity, transform',
-        }}>
+        <div
+            ref={ref}
+            style={{
+                opacity: isVisible ? 1 : 0,
+                transform: isVisible ? 'translateY(0)' : 'translateY(28px)',
+                transition: `opacity 0.7s var(--ease-out) ${delay}s, transform 0.7s var(--ease-out) ${delay}s`,
+                willChange: 'opacity, transform',
+            }}
+        >
             {children}
         </div>
     );
