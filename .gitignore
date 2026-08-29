@@ -33,3 +33,10 @@ scripts/.cache
 .env.*
 !.env.example
 
+
+# Doctoralia scrape artefacts (large, regenerable)
+scripts/doctoralia/.cache
+scripts/doctoralia/out
+
+# Claude Code local runtime state
+.claude/scheduled_tasks.lock

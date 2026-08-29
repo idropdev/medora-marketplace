@@ -1,7 +1,10 @@
-import { Star, MapPin, ChevronRight, Zap } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { Provider } from '../../types/provider';
-import { SpecialtyLabels } from '../../types/provider';
 import { trackProviderClick } from '../../utils/analytics';
+import {
+    IconStar, IconMapPin, IconChevronRight,
+    IconPromoted, SpecialtyIcon, CountryIcon,
+} from '../icons/Icons';
 
 interface ProviderCardProps {
     provider: Provider;
@@ -10,94 +13,124 @@ interface ProviderCardProps {
 }
 
 export function ProviderCard({ provider, selected, onClick }: ProviderCardProps) {
+    const { t } = useTranslation();
+
     const handleClick = () => {
         trackProviderClick(provider);
         onClick(provider);
     };
 
+    const accent = provider.country === 'MX' ? 'var(--mx)' : 'var(--us)';
+    const accentSoft = provider.country === 'MX' ? 'var(--mx-soft)' : 'var(--us-soft)';
+    const sideLabel = provider.country === 'MX' ? t('drawer.ciudadJuarez') : t('drawer.elPaso');
+
     return (
         <button
             onClick={handleClick}
+            aria-pressed={selected}
             style={{
                 width: '100%',
+                height: '100%',
                 textAlign: 'left',
-                padding: '0.875rem 1rem',
+                padding: '0.95rem 1rem',
                 borderRadius: 'var(--radius)',
-                background: selected ? 'rgba(201,168,76,0.12)' : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${selected ? 'rgba(201,168,76,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                background: selected ? 'var(--gold-dim)' : 'var(--navy-800)',
+                border: `1px solid ${selected ? 'var(--gold)' : 'var(--border)'}`,
                 color: 'var(--white)',
-                transition: 'var(--transition)',
+                transition: 'background var(--transition), border-color var(--transition), box-shadow var(--transition)',
                 cursor: 'pointer',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.5rem',
-                animation: 'fadeIn 0.25s ease both',
+                gap: '0.6rem',
+                animation: 'fadeIn 0.25s var(--ease-out) both',
             }}
             onMouseEnter={(e) => {
-                if (!selected) {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.07)';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)';
-                }
+                if (selected) return;
+                e.currentTarget.style.borderColor = 'var(--border-strong)';
+                e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
             }}
             onMouseLeave={(e) => {
-                if (!selected) {
-                    e.currentTarget.style.background = 'rgba(255,255,255,0.04)';
-                    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                }
+                if (selected) return;
+                e.currentTarget.style.borderColor = 'var(--border)';
+                e.currentTarget.style.boxShadow = 'none';
             }}
         >
             {/* Header row */}
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', justifyContent: 'space-between' }}>
-                {/* Fallback Avatar */}
-                <div style={{
-                    width: 38, height: 38, borderRadius: '50%', flexShrink: 0,
-                    background: provider.promoted ? 'linear-gradient(135deg, var(--gold), var(--gold-light))' : (provider.country === 'MX' ? 'rgba(34,197,94,0.1)' : 'rgba(59,130,246,0.1)'),
-                    color: provider.promoted ? 'var(--navy)' : (provider.country === 'MX' ? '#4ade80' : '#93c5fd'),
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontWeight: 800, fontSize: '0.9rem',
-                    boxShadow: provider.promoted ? '0 4px 12px rgba(201,168,76,0.4)' : 'none',
-                    border: `1px solid ${provider.promoted ? 'transparent' : (provider.country === 'MX' ? 'rgba(34,197,94,0.3)' : 'rgba(59,130,246,0.3)')}`
-                }}>
-                    {provider.name.charAt(0).toUpperCase()}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.7rem' }}>
+                <div
+                    style={{
+                        width: 42, height: 42, borderRadius: 11, flexShrink: 0,
+                        background: provider.promoted ? 'var(--gold-dim)' : accentSoft,
+                        color: provider.promoted ? 'var(--gold)' : accent,
+                        border: `1px solid ${provider.promoted ? 'var(--gold)' : accent}`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                >
+                    <SpecialtyIcon specialty={provider.specialty[0]} size={22} />
                 </div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.2rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexWrap: 'wrap', marginBottom: '0.3rem' }}>
                         {provider.promoted && (
-                            <span style={{
-                                display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
-                                padding: '0.1rem 0.45rem', borderRadius: 'var(--radius-pill)',
-                                background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
-                                color: 'var(--navy)', fontSize: '0.65rem', fontWeight: 700,
-                            }}>
-                                <Zap size={9} /> PROMOTED
+                            <span
+                                style={{
+                                    display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
+                                    padding: '0.12rem 0.5rem', borderRadius: 'var(--radius-pill)',
+                                    background: 'var(--brand)', color: 'var(--on-brand)',
+                                    fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.07em',
+                                }}
+                            >
+                                <IconPromoted size={10} weight={2} /> {t('drawer.promoted')}
                             </span>
                         )}
-                        <span style={{
-                            padding: '0.1rem 0.4rem', borderRadius: 'var(--radius-pill)',
-                            background: provider.country === 'MX' ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)',
-                            color: provider.country === 'MX' ? '#4ade80' : '#93c5fd',
-                            fontSize: '0.65rem', fontWeight: 600,
-                        }}>
-                            {provider.country === 'MX' ? '🇲🇽 Juárez' : '🇺🇸 El Paso'}
+                        <span
+                            style={{
+                                display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
+                                padding: '0.12rem 0.5rem', borderRadius: 'var(--radius-pill)',
+                                background: accentSoft, color: accent,
+                                fontSize: '0.68rem', fontWeight: 700,
+                            }}
+                        >
+                            <CountryIcon country={provider.country} size={11} weight={2} /> {sideLabel}
                         </span>
                     </div>
-                    <p style={{ fontWeight: 600, fontSize: '0.9rem', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+
+                    <p
+                        style={{
+                            fontWeight: 700, fontSize: '1rem', lineHeight: 1.3,
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}
+                    >
                         {provider.name}
                     </p>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--gray-400)', marginTop: '0.15rem' }}>
-                        {provider.specialty.map((s) => SpecialtyLabels[s]).join(' · ')}
+                    <p
+                        style={{
+                            fontSize: '0.82rem', color: 'var(--gray-400)', marginTop: '0.18rem',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                        }}
+                    >
+                        {provider.specialty.map((s) => t(`specialties.${s}`, { defaultValue: s })).join(' · ')}
                     </p>
                 </div>
-                <ChevronRight size={16} style={{ color: 'var(--gray-400)', flexShrink: 0, marginTop: 2 }} />
+
+                <span style={{ color: 'var(--gray-500)', flexShrink: 0, marginTop: 4, display: 'flex' }}>
+                    <IconChevronRight size={17} />
+                </span>
             </div>
 
             {/* Rating + location */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.875rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.9rem' }}>
                 <RatingBadge rating={provider.rating} count={provider.reviewCount} />
-                <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', fontSize: '0.75rem', color: 'var(--gray-400)', overflow: 'hidden' }}>
-                    <MapPin size={12} />
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{provider.city}</span>
+                <span
+                    style={{
+                        display: 'flex', alignItems: 'center', gap: '0.3rem',
+                        fontSize: '0.82rem', color: 'var(--gray-400)', overflow: 'hidden', minWidth: 0,
+                    }}
+                >
+                    <IconMapPin size={14} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {provider.city}
+                    </span>
                 </span>
             </div>
         </button>
@@ -106,10 +139,10 @@ export function ProviderCard({ provider, selected, onClick }: ProviderCardProps)
 
 export function RatingBadge({ rating, count }: { rating: number; count: number }) {
     return (
-        <span style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', fontSize: '0.75rem' }}>
-            <Star size={12} style={{ color: 'var(--gold)', fill: 'var(--gold)' }} />
-            <strong style={{ color: 'var(--white)' }}>{rating.toFixed(1)}</strong>
-            <span style={{ color: 'var(--gray-400)' }}>({count})</span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: '0.28rem', fontSize: '0.82rem' }}>
+            <IconStar size={14} filled style={{ color: 'var(--gold)' }} />
+            <strong style={{ color: 'var(--white)', fontWeight: 800 }}>{rating.toFixed(1)}</strong>
+            <span style={{ color: 'var(--gray-400)' }}>({count.toLocaleString()})</span>
         </span>
     );
 }

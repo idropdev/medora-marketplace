@@ -2,6 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const GOOGLE_KEY = process.env.VITE_GOOGLE_MAPS_API_KEY;
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
@@ -104,6 +107,67 @@ async function fetchPlaceDetails(placeId: string) {
   return result;
 }
 
+const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+const EMAIL_EXCLUDE = /\.(png|jpg|jpeg|gif|svg|webp)$/i;
+
+async function fetchWithTimeout(url: string, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, {
+      signal: controller.signal,
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; MedoraBot/1.0; +https://medoramarketplace.com)' },
+    });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function extractEmailFromHtml(html: string): string | null {
+  const mailtoMatch = html.match(/mailto:([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i);
+  if (mailtoMatch) return mailtoMatch[1];
+
+  const matches = html.match(EMAIL_REGEX);
+  if (!matches) return null;
+  return matches.find((e) => !EMAIL_EXCLUDE.test(e)) || null;
+}
+
+async function scrapeEmailFromWebsite(websiteUrl: string): Promise<string | null> {
+  const cacheKey = `email_${crypto.createHash('md5').update(websiteUrl).digest('hex')}`;
+  const cached = getCache(cacheKey);
+  if (cached) {
+    return cached.email || null;
+  }
+
+  const pagesToTry = [websiteUrl];
+  try {
+    const base = new URL(websiteUrl);
+    pagesToTry.push(new URL('/contact', base).toString());
+    pagesToTry.push(new URL('/contact-us', base).toString());
+  } catch {
+    // malformed website URL — just try it as-is
+  }
+
+  for (const pageUrl of pagesToTry) {
+    try {
+      const res = await fetchWithTimeout(pageUrl);
+      if (!res.ok) continue;
+      const html = await res.text();
+      const email = extractEmailFromHtml(html);
+      if (email) {
+        setCache(cacheKey, { email });
+        return email;
+      }
+    } catch {
+      // network error, timeout, or invalid URL — try next candidate page
+      continue;
+    }
+  }
+
+  setCache(cacheKey, { email: null });
+  return null;
+}
+
 function extractCityAndCountry(addressComponents: any[]) {
   let city = '';
   let countryCode = '';
@@ -144,6 +208,8 @@ async function runSeeder() {
         // Ensure country code maps strictly to 'US' or 'MX' per your Provider interface
         const country = countryCode === 'MX' ? 'MX' : 'US';
 
+        const email = details.website ? await scrapeEmailFromWebsite(details.website) : null;
+
         const providerData = {
           // generate a random UUID for the new record
           id: crypto.randomUUID(), 
@@ -158,6 +224,7 @@ async function runSeeder() {
           reviewCount: details.user_ratings_total || 0,
           phone: details.international_phone_number || null,
           website: details.website || null,
+          email: email,
           languages: country === 'MX' ? ['es', 'en'] : ['en', 'es'], // guess languages based on country
           promoted: false,
           verified: false,
@@ -187,7 +254,7 @@ async function runSeeder() {
           // Usually means the table isn't set up yet, or RLS policies blocked anonymous INSERTS
           console.error(`❌ Failed to insert ${providerData.name}:`, error.message);
         } else {
-          console.log(`✅ Inserted: ${providerData.name}`);
+          console.log(`✅ Inserted: ${providerData.name}${email ? ` (email: ${email})` : ' (no email found)'}`);
           totalInserted++;
         }
 

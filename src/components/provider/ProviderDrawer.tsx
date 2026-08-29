@@ -1,9 +1,15 @@
-import { X, Star, MapPin, Phone, Globe, Languages, Zap, CheckCircle, ExternalLink } from 'lucide-react';
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { Provider } from '../../types/provider';
-import { trackProviderClick } from '../../utils/analytics';
 import { useGoogleReviews } from '../../hooks/useGoogleReviews';
 import { ReviewCarousel } from './ReviewCarousel';
+import { ClinicPhotos } from './ClinicPhotos';
+import { InsuranceList } from './InsuranceList';
+import {
+    IconClose, IconStar, IconMapPin, IconPhone, IconLanguage,
+    IconPromoted, IconVerified, IconReviews, IconViews,
+    SpecialtyIcon, CountryIcon,
+} from '../icons/Icons';
 
 interface ProviderDrawerProps {
     provider: Provider | null;
@@ -14,153 +20,209 @@ export function ProviderDrawer({ provider, onClose }: ProviderDrawerProps) {
     const { t } = useTranslation();
     const { reviews, loading: reviewsLoading } = useGoogleReviews(provider?.googlePlaceId);
 
+    // Escape closes the drawer — expected of any overlay panel.
+    useEffect(() => {
+        if (!provider) return;
+        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+        window.addEventListener('keydown', onKey);
+        return () => window.removeEventListener('keydown', onKey);
+    }, [provider, onClose]);
+
     if (!provider) return null;
 
-    const handleWebsiteClick = () => {
-        trackProviderClick(provider);
-        window.open(provider.website, '_blank', 'noopener');
-    };
-
     const specialtyLabel = (s: string) => t(`specialties.${s}`, { defaultValue: s });
+    const accent = provider.country === 'MX' ? 'var(--mx)' : 'var(--us)';
+    const accentSoft = provider.country === 'MX' ? 'var(--mx-soft)' : 'var(--us-soft)';
 
     return (
         <>
-            {/* Backdrop */}
             <div
                 onClick={onClose}
                 style={{
                     position: 'fixed', inset: 0, zIndex: 200,
-                    background: 'rgba(0,0,0,0.4)',
-                    backdropFilter: 'blur(4px)',
+                    background: 'rgba(8, 15, 28, 0.35)',
                 }}
             />
 
-            {/* Drawer panel */}
             <div
                 className="drawer-panel"
+                role="dialog"
+                aria-label={provider.name}
                 style={{
-                    position: 'fixed', top: 60, right: 0, bottom: 0,
-                    width: '100%', maxWidth: 400,
+                    position: 'fixed', top: 68, right: 0, bottom: 0,
+                    width: '100%', maxWidth: 440,
                     zIndex: 201,
                     background: 'var(--navy-800)',
-                    borderLeft: '1px solid rgba(255,255,255,0.1)',
+                    borderLeft: '1px solid var(--border)',
                     overflowY: 'auto',
-                    animation: 'slideInRight 0.25s ease both',
+                    animation: 'slideInRight 0.26s var(--ease-out) both',
                     display: 'flex',
                     flexDirection: 'column',
                 }}
             >
                 {/* Header */}
-                <div style={{ padding: '1.25rem 1.25rem 1rem', borderBottom: '1px solid rgba(255,255,255,0.08)', position: 'sticky', top: 0, background: 'var(--navy-800)', zIndex: 1 }}>
+                <div
+                    style={{
+                        padding: '1.35rem 1.35rem 1.15rem',
+                        borderBottom: '1px solid var(--border)',
+                        position: 'sticky', top: 0,
+                        background: 'var(--navy-800)', zIndex: 1,
+                    }}
+                >
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.75rem' }}>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                            {/* Badges */}
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.5rem' }}>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.7rem' }}>
                                 {provider.promoted && (
-                                    <span style={{
-                                        display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
-                                        padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-pill)',
-                                        background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
-                                        color: 'var(--navy)', fontSize: '0.7rem', fontWeight: 700,
-                                    }}>
-                                        <Zap size={10} /> {t('drawer.promoted')}
-                                    </span>
+                                    <Badge
+                                        icon={<IconPromoted size={11} weight={2} />}
+                                        label={t('drawer.promoted')}
+                                        bg="var(--brand)"
+                                        fg="var(--on-brand)"
+                                    />
                                 )}
                                 {provider.verified && (
-                                    <span style={{
-                                        display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
-                                        padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-pill)',
-                                        background: 'rgba(34,197,94,0.15)', color: '#4ade80',
-                                        fontSize: '0.7rem', fontWeight: 600,
-                                    }}>
-                                        <CheckCircle size={10} /> {t('drawer.verified')}
-                                    </span>
+                                    <Badge
+                                        icon={<IconVerified size={11} weight={2} />}
+                                        label={t('drawer.verified')}
+                                        bg="var(--mx-soft)"
+                                        fg="var(--green)"
+                                    />
                                 )}
-                                <span style={{
-                                    padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-pill)',
-                                    background: provider.country === 'MX' ? 'rgba(34,197,94,0.1)' : 'rgba(59,130,246,0.1)',
-                                    color: provider.country === 'MX' ? '#4ade80' : '#93c5fd',
-                                    fontSize: '0.7rem', fontWeight: 600,
-                                }}>
-                                    {provider.country === 'MX' ? t('drawer.ciudadJuarez') : t('drawer.elPaso')}
-                                </span>
+                                <Badge
+                                    icon={<CountryIcon country={provider.country} size={11} weight={2} />}
+                                    label={provider.country === 'MX' ? t('drawer.ciudadJuarez') : t('drawer.elPaso')}
+                                    bg={accentSoft}
+                                    fg={accent}
+                                />
                             </div>
 
-                            <h2 style={{ fontSize: '1.15rem', fontWeight: 700, lineHeight: 1.3 }}>{provider.name}</h2>
-                            <p style={{ fontSize: '0.8rem', color: 'var(--gray-400)', marginTop: '0.25rem' }}>
-                                {provider.specialty.map(specialtyLabel).join(' · ')}
-                            </p>
+                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.7rem' }}>
+                                <div
+                                    style={{
+                                        width: 40, height: 40, borderRadius: 11, flexShrink: 0,
+                                        background: accentSoft, color: accent,
+                                        border: `1px solid ${accent}`,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    }}
+                                >
+                                    <SpecialtyIcon specialty={provider.specialty[0]} size={21} />
+                                </div>
+                                <div style={{ minWidth: 0 }}>
+                                    <h2 style={{ fontSize: '1.3rem', fontWeight: 800, lineHeight: 1.25, letterSpacing: '-0.015em' }}>
+                                        {provider.name}
+                                    </h2>
+                                    <p style={{ fontSize: '0.87rem', color: 'var(--gray-400)', marginTop: '0.25rem', lineHeight: 1.45 }}>
+                                        {provider.specialty.map(specialtyLabel).join(' · ')}
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                        <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', borderRadius: 8, padding: '0.4rem', color: 'var(--gray-400)', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                            <X size={18} />
+
+                        <button
+                            onClick={onClose}
+                            aria-label={t('drawer.close')}
+                            title={t('drawer.close')}
+                            className="press"
+                            style={{
+                                background: 'var(--surface)',
+                                border: '1px solid var(--border)',
+                                borderRadius: 9, padding: '0.45rem',
+                                color: 'var(--gray-300)',
+                                display: 'flex', alignItems: 'center', flexShrink: 0,
+                            }}
+                        >
+                            <IconClose size={18} weight={2} />
                         </button>
                     </div>
                 </div>
 
                 {/* Body */}
-                <div style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1.25rem', flex: 1 }}>
-                    {/* Rating */}
-                    <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 'var(--radius)', padding: '1rem', display: 'flex', justifyContent: 'space-around' }}>
-                        <StatBox icon={<Star size={18} style={{ color: 'var(--gold)', fill: 'var(--gold)' }} />} value={provider.rating.toFixed(1)} label={t('drawer.rating')} />
-                        <div style={{ width: 1, background: 'rgba(255,255,255,0.08)' }} />
-                        <StatBox icon={<span style={{ fontSize: '1.1rem' }}>💬</span>} value={provider.reviewCount.toLocaleString()} label={t('drawer.reviews')} />
-                        <div style={{ width: 1, background: 'rgba(255,255,255,0.08)' }} />
-                        <StatBox icon={<span style={{ fontSize: '1.1rem' }}>👁</span>} value={provider.clicks.toLocaleString()} label={t('drawer.profileViews')} />
-                    </div>
-
-                    {/* Contact Info */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                        <DetailRow icon={<MapPin size={15} />} text={provider.address} />
-                        {provider.phone && <DetailRow icon={<Phone size={15} />} text={provider.phone} href={`tel:${provider.phone}`} />}
-                        <DetailRow
-                            icon={<Languages size={15} />}
-                            text={provider.languages.map((l) => l === 'en' ? t('drawer.languageEN') : t('drawer.languageES')).join(' · ')}
+                <div style={{ padding: '1.35rem', display: 'flex', flexDirection: 'column', gap: '1.4rem', flex: 1 }}>
+                    {/* Stats */}
+                    <div
+                        style={{
+                            background: 'var(--surface)',
+                            border: '1px solid var(--border)',
+                            borderRadius: 'var(--radius)',
+                            padding: '1.1rem 0.75rem',
+                            display: 'flex', justifyContent: 'space-around',
+                        }}
+                    >
+                        <StatBox
+                            icon={<IconStar size={19} filled style={{ color: 'var(--gold)' }} />}
+                            value={provider.rating.toFixed(1)}
+                            label={t('drawer.rating')}
+                        />
+                        <Divider />
+                        <StatBox
+                            icon={<IconReviews size={19} style={{ color: 'var(--gray-500)' }} />}
+                            value={provider.reviewCount.toLocaleString()}
+                            label={t('drawer.reviews')}
+                        />
+                        <Divider />
+                        <StatBox
+                            icon={<IconViews size={19} style={{ color: 'var(--gray-500)' }} />}
+                            value={provider.clicks.toLocaleString()}
+                            label={t('drawer.profileViews')}
                         />
                     </div>
 
-                    {/* CTA Buttons */}
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                        {provider.website && (
-                            <button
-                                onClick={handleWebsiteClick}
-                                style={{
-                                    flex: 1,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem',
-                                    padding: '0.8rem 1rem', borderRadius: 'var(--radius)',
-                                    background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
-                                    color: 'var(--navy)', fontWeight: 700, fontSize: '0.85rem',
-                                    transition: 'var(--transition)', border: 'none',
-                                    whiteSpace: 'nowrap',
-                                }}
-                                onMouseEnter={(e) => { e.currentTarget.style.filter = 'brightness(1.1)'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.filter = ''; }}
-                            >
-                                <Globe size={14} /> {t('drawer.visitWebsite')} <ExternalLink size={13} />
-                            </button>
-                        )}
+                    {/* Contact */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <DetailRow icon={<IconMapPin size={17} />} text={provider.address} />
                         {provider.phone && (
-                            <a
-                                href={`tel:${provider.phone}`}
-                                style={{
-                                    flex: provider.website ? '0 0 auto' : 1,
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.45rem',
-                                    padding: '0.8rem 1rem', borderRadius: 'var(--radius)',
-                                    background: provider.website
-                                        ? 'rgba(255,255,255,0.07)'
-                                        : 'linear-gradient(135deg, var(--gold), var(--gold-light))',
-                                    border: provider.website ? '1px solid rgba(255,255,255,0.12)' : 'none',
-                                    color: provider.website ? 'var(--gray-300)' : 'var(--navy)',
-                                    fontWeight: 700, fontSize: '0.85rem',
-                                    whiteSpace: 'nowrap',
-                                    textDecoration: 'none',
-                                }}
-                            >
-                                <Phone size={14} /> {t('drawer.callNow')}
-                            </a>
+                            <DetailRow icon={<IconPhone size={17} />} text={provider.phone} href={`tel:${provider.phone}`} />
                         )}
+                        <DetailRow
+                            icon={<IconLanguage size={17} />}
+                            text={provider.languages
+                                .map((l) => (l === 'en' ? t('drawer.languageEN') : t('drawer.languageES')))
+                                .join(' · ')}
+                        />
                     </div>
 
-                    {/* Reviews Carousel */}
+                    {/* Primary action — calling the clinic is the whole point of the page. */}
+                    {provider.phone && (
+                        <a
+                            href={`tel:${provider.phone}`}
+                            className="press"
+                            style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                                padding: '0.95rem 1rem', borderRadius: 'var(--radius)',
+                                background: 'var(--brand)', color: 'var(--on-brand)',
+                                fontWeight: 700, fontSize: '0.95rem',
+                                textDecoration: 'none',
+                            }}
+                        >
+                            <IconPhone size={17} weight={2} /> {t('drawer.callNow')}
+                        </a>
+                    )}
+
+                    {/* Online booking — only shown where the Doctoralia listing
+                        actually has a bookable calendar, so the button never
+                        leads to a dead end. */}
+                    {provider.bookingUrl && (
+                        <a
+                            href={provider.bookingUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="press"
+                            style={{
+                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                                padding: '0.85rem 1rem', borderRadius: 'var(--radius)',
+                                border: '1px solid var(--border)', background: 'transparent',
+                                color: 'var(--text)', fontWeight: 650, fontSize: '0.92rem',
+                                textDecoration: 'none',
+                            }}
+                        >
+                            {t('drawer.bookOnline', { defaultValue: 'Book an appointment' })}
+                        </a>
+                    )}
+
+                    <ClinicPhotos placeId={provider.googlePlaceId} />
+
+                    <InsuranceList insurances={provider.insurances ?? []} />
+
                     <ReviewCarousel reviews={reviews} loading={reviewsLoading} />
                 </div>
             </div>
@@ -168,25 +230,49 @@ export function ProviderDrawer({ provider, onClose }: ProviderDrawerProps) {
     );
 }
 
+function Badge({ icon, label, bg, fg }: { icon: React.ReactNode; label: string; bg: string; fg: string }) {
+    return (
+        <span
+            style={{
+                display: 'inline-flex', alignItems: 'center', gap: '0.28rem',
+                padding: '0.22rem 0.6rem', borderRadius: 'var(--radius-pill)',
+                background: bg, color: fg,
+                fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.04em',
+            }}
+        >
+            {icon} {label}
+        </span>
+    );
+}
+
+function Divider() {
+    return <div style={{ width: 1, background: 'var(--border)' }} />;
+}
+
 function StatBox({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.3rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem', minWidth: 0 }}>
             {icon}
-            <span style={{ fontWeight: 700, fontSize: '1.1rem' }}>{value}</span>
-            <span style={{ fontSize: '0.7rem', color: 'var(--gray-400)' }}>{label}</span>
+            <span style={{ fontWeight: 800, fontSize: '1.2rem' }}>{value}</span>
+            <span style={{ fontSize: '0.72rem', color: 'var(--gray-400)', textAlign: 'center' }}>{label}</span>
         </div>
     );
 }
 
 function DetailRow({ icon, text, href }: { icon: React.ReactNode; text: string; href?: string }) {
     const content = (
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.6rem', fontSize: '0.85rem', color: href ? 'var(--gold-light)' : 'var(--gray-400)' }}>
-            <span style={{ flexShrink: 0, marginTop: 1, color: 'var(--gray-600)' }}>{icon}</span>
+        <div
+            style={{
+                display: 'flex', alignItems: 'flex-start', gap: '0.65rem',
+                fontSize: '0.9rem', lineHeight: 1.5,
+                color: href ? 'var(--gold)' : 'var(--gray-300)',
+                fontWeight: href ? 600 : 400,
+            }}
+        >
+            <span style={{ flexShrink: 0, marginTop: 1, color: 'var(--gray-500)', display: 'flex' }}>{icon}</span>
             <span>{text}</span>
         </div>
     );
-    if (href) {
-        return <a href={href} rel="noopener noreferrer">{content}</a>;
-    }
-    return content;
+
+    return href ? <a href={href} rel="noopener noreferrer">{content}</a> : content;
 }

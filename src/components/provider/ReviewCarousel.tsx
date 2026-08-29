@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
-import { Star, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { GoogleReview } from '../../hooks/useGoogleReviews';
+import { IconStar, IconChevronLeft, IconChevronRight } from '../icons/Icons';
 
 interface ReviewCarouselProps {
     reviews: GoogleReview[];
@@ -25,30 +25,22 @@ export function ReviewCarousel({ reviews, loading }: ReviewCarouselProps) {
         const el = scrollRef.current;
         if (!el) return;
         const amount = el.clientWidth * 0.8;
-        el.scrollBy({
-            left: direction === 'left' ? -amount : amount,
-            behavior: 'smooth',
-        });
+        el.scrollBy({ left: direction === 'left' ? -amount : amount, behavior: 'smooth' });
     };
 
     if (loading) {
         return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                <h3 style={{
-                    fontSize: '0.85rem', fontWeight: 600,
-                    color: 'var(--gray-300)', letterSpacing: '0.02em',
-                }}>
-                    ⭐ Top Reviews
-                </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                <SectionHeading>{t('drawer.topReviews')}</SectionHeading>
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
                     {[1, 2].map((i) => (
                         <div
                             key={i}
+                            className="skeleton"
                             style={{
-                                minWidth: 240, height: 120,
+                                minWidth: 250, height: 132,
                                 borderRadius: 'var(--radius)',
-                                background: 'rgba(255,255,255,0.04)',
-                                animation: 'pulse 1.5s ease-in-out infinite',
+                                border: '1px solid var(--border)',
                             }}
                         />
                     ))}
@@ -60,41 +52,22 @@ export function ReviewCarousel({ reviews, loading }: ReviewCarouselProps) {
     if (reviews.length === 0) return null;
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-            {/* Section header */}
-            <div style={{
-                display: 'flex', alignItems: 'center',
-                justifyContent: 'space-between',
-            }}>
-                <h3 style={{
-                    fontSize: '0.85rem', fontWeight: 600,
-                    color: 'var(--gray-300)', letterSpacing: '0.02em',
-                    margin: 0,
-                }}>
-                    {t('drawer.topReviews')}
-                </h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <SectionHeading>{t('drawer.topReviews')}</SectionHeading>
 
-                {/* Scroll arrows */}
                 {reviews.length > 1 && (
-                    <div style={{ display: 'flex', gap: '0.25rem' }}>
-                        <ScrollButton
-                            direction="left"
-                            disabled={!canScrollLeft}
-                            onClick={() => scroll('left')}
-                        />
-                        <ScrollButton
-                            direction="right"
-                            disabled={!canScrollRight}
-                            onClick={() => scroll('right')}
-                        />
+                    <div style={{ display: 'flex', gap: '0.3rem' }}>
+                        <ScrollButton direction="left" disabled={!canScrollLeft} onClick={() => scroll('left')} />
+                        <ScrollButton direction="right" disabled={!canScrollRight} onClick={() => scroll('right')} />
                     </div>
                 )}
             </div>
 
-            {/* Scrollable track */}
             <div
                 ref={scrollRef}
                 onScroll={updateScrollButtons}
+                className="review-scroll-track"
                 style={{
                     display: 'flex',
                     gap: '0.75rem',
@@ -102,17 +75,32 @@ export function ReviewCarousel({ reviews, loading }: ReviewCarouselProps) {
                     scrollSnapType: 'x mandatory',
                     WebkitOverflowScrolling: 'touch',
                     paddingBottom: '0.25rem',
-                    /* hide scrollbar */
                     scrollbarWidth: 'none',
                     msOverflowStyle: 'none',
                 }}
-                className="review-scroll-track"
             >
                 {reviews.map((review, idx) => (
                     <ReviewCard key={idx} review={review} />
                 ))}
             </div>
         </div>
+    );
+}
+
+function SectionHeading({ children }: { children: React.ReactNode }) {
+    return (
+        <h3
+            style={{
+                fontSize: '0.72rem',
+                fontWeight: 800,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color: 'var(--gray-400)',
+                margin: 0,
+            }}
+        >
+            {children}
+        </h3>
     );
 }
 
@@ -125,93 +113,87 @@ function ReviewCard({ review }: { review: GoogleReview }) {
     return (
         <div
             style={{
-                minWidth: 260,
-                maxWidth: 280,
+                minWidth: 265,
+                maxWidth: 285,
                 flexShrink: 0,
                 scrollSnapAlign: 'start',
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.06)',
+                background: 'var(--surface)',
+                border: '1px solid var(--border)',
                 borderRadius: 'var(--radius)',
-                padding: '0.85rem',
+                padding: '0.95rem',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '0.5rem',
-                transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
-                cursor: 'default',
+                gap: '0.6rem',
+                transition: 'border-color 0.2s var(--ease-out)',
             }}
-            onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(201,168,76,0.25)';
-                e.currentTarget.style.boxShadow = '0 2px 12px rgba(201,168,76,0.08)';
-            }}
-            onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
-                e.currentTarget.style.boxShadow = 'none';
-            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--border-strong)'; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; }}
         >
-            {/* Author row */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            {/* Author */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
                 {review.profile_photo_url ? (
                     <img
                         src={review.profile_photo_url}
-                        alt={review.author_name}
+                        alt=""
                         referrerPolicy="no-referrer"
                         style={{
-                            width: 28, height: 28, borderRadius: '50%',
+                            width: 32, height: 32, borderRadius: '50%',
                             objectFit: 'cover',
-                            border: '1px solid rgba(255,255,255,0.1)',
+                            border: '1px solid var(--border)',
                         }}
                     />
                 ) : (
-                    <div style={{
-                        width: 28, height: 28, borderRadius: '50%',
-                        background: 'linear-gradient(135deg, var(--gold), var(--gold-light))',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        fontSize: '0.7rem', fontWeight: 700, color: 'var(--navy)',
-                    }}>
+                    <div
+                        style={{
+                            width: 32, height: 32, borderRadius: '50%',
+                            background: 'var(--brand)', color: 'var(--on-brand)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            fontSize: '0.8rem', fontWeight: 800,
+                        }}
+                    >
                         {review.author_name.charAt(0).toUpperCase()}
                     </div>
                 )}
                 <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{
-                        fontSize: '0.78rem', fontWeight: 600,
-                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                    }}>
+                    <div
+                        style={{
+                            fontSize: '0.85rem', fontWeight: 700,
+                            whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                        }}
+                    >
                         {review.author_name}
                     </div>
-                    <div style={{
-                        fontSize: '0.65rem', color: 'var(--gray-500)',
-                    }}>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--gray-500)' }}>
                         {review.relative_time_description}
                     </div>
                 </div>
             </div>
 
             {/* Stars */}
-            <div style={{ display: 'flex', gap: '2px' }}>
+            <div style={{ display: 'flex', gap: '2px' }} aria-label={`${review.rating} / 5`}>
                 {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
+                    <IconStar
                         key={i}
-                        size={12}
-                        style={{
-                            color: i < review.rating ? 'var(--gold)' : 'var(--gray-700)',
-                            fill: i < review.rating ? 'var(--gold)' : 'none',
-                        }}
+                        size={13}
+                        filled={i < review.rating}
+                        style={{ color: i < review.rating ? 'var(--gold)' : 'var(--gray-700)' }}
                     />
                 ))}
             </div>
 
-            {/* Review text */}
-            <p style={{
-                fontSize: '0.76rem',
-                lineHeight: 1.5,
-                color: 'var(--gray-400)',
-                margin: 0,
-                overflow: 'hidden',
-                display: '-webkit-box',
-                WebkitLineClamp: expanded ? 999 : 3,
-                WebkitBoxOrient: 'vertical',
-            }}>
-                {review.text || 'No written review.'}
+            <p
+                style={{
+                    fontSize: '0.84rem',
+                    lineHeight: 1.55,
+                    color: 'var(--gray-300)',
+                    margin: 0,
+                    overflow: 'hidden',
+                    display: '-webkit-box',
+                    WebkitLineClamp: expanded ? 999 : 3,
+                    WebkitBoxOrient: 'vertical',
+                }}
+            >
+                {review.text || t('drawer.noWrittenReview')}
             </p>
 
             {isLong && (
@@ -219,9 +201,8 @@ function ReviewCard({ review }: { review: GoogleReview }) {
                     onClick={() => setExpanded(!expanded)}
                     style={{
                         background: 'none', border: 'none', padding: 0,
-                        fontSize: '0.7rem', color: 'var(--gold-light)',
-                        cursor: 'pointer', alignSelf: 'flex-start',
-                        fontWeight: 600,
+                        fontSize: '0.78rem', color: 'var(--gold)',
+                        alignSelf: 'flex-start', fontWeight: 700,
                     }}
                 >
                     {expanded ? t('drawer.showLess') : t('drawer.readMore')}
@@ -231,12 +212,8 @@ function ReviewCard({ review }: { review: GoogleReview }) {
     );
 }
 
-/* ── Scroll arrow button ──────────────────────────────────────────────── */
-function ScrollButton({
-    direction,
-    disabled,
-    onClick,
-}: {
+/* ── Scroll arrow ─────────────────────────────────────────────────────── */
+function ScrollButton({ direction, disabled, onClick }: {
     direction: 'left' | 'right';
     disabled: boolean;
     onClick: () => void;
@@ -245,26 +222,21 @@ function ScrollButton({
         <button
             onClick={onClick}
             disabled={disabled}
+            aria-label={direction === 'left' ? 'Previous reviews' : 'Next reviews'}
             style={{
-                width: 24, height: 24,
+                width: 28, height: 28,
                 borderRadius: '50%',
-                background: disabled
-                    ? 'rgba(255,255,255,0.03)'
-                    : 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'var(--navy-800)',
+                border: '1px solid var(--border)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: disabled ? 'default' : 'pointer',
-                opacity: disabled ? 0.3 : 1,
-                transition: 'all 0.15s ease',
-                color: 'var(--gray-400)',
+                opacity: disabled ? 0.35 : 1,
+                transition: 'opacity 0.15s var(--ease-out)',
+                color: 'var(--gray-300)',
                 padding: 0,
             }}
         >
-            {direction === 'left' ? (
-                <ChevronLeft size={14} />
-            ) : (
-                <ChevronRight size={14} />
-            )}
+            {direction === 'left' ? <IconChevronLeft size={15} weight={2} /> : <IconChevronRight size={15} weight={2} />}
         </button>
     );
 }

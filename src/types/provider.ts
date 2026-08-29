@@ -1,5 +1,5 @@
 export type Country = 'MX' | 'US';
-export type ProviderSource = 'google' | 'manual';
+export type ProviderSource = 'google' | 'manual' | 'doctoralia';
 
 export type Specialty =
   | 'dentist'
@@ -49,12 +49,18 @@ export interface Provider {
   reviewCount: number;
   phone?: string;
   website?: string;
+  email?: string;
   languages: string[];
   promoted: boolean;
   verified: boolean;
   source: ProviderSource;
   clicks: number;
   googlePlaceId?: string;
+  doctoraliaId?: string;
+  /** Insurers accepted, verbatim as published (e.g. 'GNP Seguros'). */
+  insurances?: string[];
+  /** Doctoralia profile with a bookable calendar. Null when there is none. */
+  bookingUrl?: string;
   imageUrl?: string;
 }
 

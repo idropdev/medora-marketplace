@@ -37,21 +37,42 @@ const mockGoogleReviews: GoogleReview[] = [
 ];
 
 /**
+ * Reviews already fetched this session, keyed by placeId.
+ *
+ * Opening a provider fires a live Places round trip, which is most of the delay
+ * when a drawer opens. Reviews change on the order of days, so re-fetching them
+ * because a user reopened the same clinic is pure latency — and pure API spend.
+ * The cache lives at module scope so it survives drawer unmount/remount.
+ */
+const reviewCache = new Map<string, GoogleReview[]>();
+
+/**
  * Fetches Google Place reviews for a given placeId using the Places Service.
  * Only returns reviews with rating >= 4 ("good reviews").
  * Automatically loads the Places library if not yet available.
  * Falls back to high-quality mock reviews when Google API is blocked or offline.
  */
 export function useGoogleReviews(placeId?: string) {
-    const [reviews, setReviews] = useState<GoogleReview[]>([]);
+    // Seed from cache during the first render so a revisited clinic paints its
+    // reviews immediately, with no loading flash.
+    const [reviews, setReviews] = useState<GoogleReview[]>(
+        () => (placeId && reviewCache.get(placeId)) || [],
+    );
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState<string>('');
 
     useEffect(() => {
         if (!placeId) {
-            console.warn('[useGoogleReviews] No placeId provided. Loading mock reviews fallback.');
             setReviews(mockGoogleReviews);
             setStatus('no-place-id-fallback');
+            return;
+        }
+
+        const cached = reviewCache.get(placeId);
+        if (cached) {
+            setReviews(cached);
+            setStatus('cache');
+            setLoading(false);
             return;
         }
 
@@ -94,10 +115,15 @@ export function useGoogleReviews(placeId?: string) {
                                     profile_photo_url:
                                         (r as any).profile_photo_url ?? undefined,
                                 }));
+                            reviewCache.set(placeId!, good);
                             setReviews(good);
                         } else {
                             // Fallback to mock reviews if API limits or billing blocks occur
                             console.warn(`[useGoogleReviews] API error status: ${apiStatus}. Falling back to mock reviews.`);
+                            // Cache the fallback as well: asking again this
+                            // session cannot produce reviews that do not exist,
+                            // and each attempt is a billable Places call.
+                            reviewCache.set(placeId!, mockGoogleReviews);
                             setReviews(mockGoogleReviews);
                         }
                         setLoading(false);
